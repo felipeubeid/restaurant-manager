@@ -1,0 +1,49 @@
+[
+  {
+    "category": "Appetizer",
+    "items": [
+      {
+        "id": 2,
+        "name": "Caesar Salad",
+        "description": "Romaine lettuce, croutons, parmesan, and Caesar dressing.",
+        "cost": 2.10,
+        "price": 7.50,
+        "available": true
+      }
+    ]
+  },
+  {
+    "category": "Main Course",
+    "items": [
+      {
+        "id": 1,
+        "name": "Margherita Pizza",
+        "description": "Classic pizza with tomato sauce, mozzarella, and fresh basil.",
+        "cost": 4.25,
+        "price": 12.00,
+        "available": true
+      },
+      {
+        "id": 3,
+        "name": "Spaghetti Carbonara",
+        "description": "Pasta with creamy sauce, pancetta, and parmesan.",
+        "cost": 3.90,
+        "price": 13.00,
+        "available": true
+      }
+    ]
+  },
+  {
+    "category": "Side",
+    "items": [
+      {
+        "id": 5,
+        "name": "Garlic Bread",
+        "description": "Toasted baguette slices with garlic butter.",
+        "cost": 0.90,
+        "price": 3.00,
+        "available": true
+      }
+    ]
+  }
+]
