@@ -1,5 +1,6 @@
 import React from 'react'
 import InventoryItem from '@/components/InventoryItem'
+import InventoryList from '@/components/InventoryList'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -89,9 +90,7 @@ const Inventory = () => {
           </Link>
         </div>
         <div className="space-y-6 px-4">
-          {inventory.map((item) => (
-            inventory.length > 0 && (<InventoryItem key={item.id} item={item} />)
-          ))}
+          <InventoryList inventory={inventory}></InventoryList>
         </div>
       </div>
     </div>
