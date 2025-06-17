@@ -14,7 +14,7 @@ const FinancesSummary = ({summary}) => {
         </CardHeader>
         <CardContent>
             <div className="text-2xl font-bold text-green-600 pb-2 break-words">${summary.totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">This week</p>
+            <p className="text-xs text-gray-500">This week</p>
           </CardContent>
       </Card>
 
@@ -27,7 +27,7 @@ const FinancesSummary = ({summary}) => {
         </CardHeader>
         <CardContent>
             <div className="text-2xl font-bold text-red-600 pb-2 break-words">${summary.totalExpenses.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">This week</p>
+            <p className="text-xs text-gray-500">This week</p>
           </CardContent>
       </Card>
 
@@ -43,7 +43,7 @@ const FinancesSummary = ({summary}) => {
                 summary.netProfit >= 0 ? "text-2xl font-bold text-green-600 pb-2 break-words" 
                 : "text-2xl font-bold text-red-600 pb-2 break-words"}>
                     ${summary.netProfit.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">This week</p>
+            <p className="text-xs text-gray-500">This week</p>
           </CardContent>
       </Card>
 
@@ -59,7 +59,7 @@ const FinancesSummary = ({summary}) => {
                 summary.profitMargin >= 0 ? "text-2xl font-bold text-green-600 pb-2 break-words" 
                 : "text-2xl font-bold text-red-600 pb-2 break-words"}>
                     {summary.profitMargin.toFixed(2)}%</div>
-            <p className="text-xs text-muted-foreground">This week</p>
+            <p className="text-xs text-gray-500">This week</p>
           </CardContent>
       </Card>
     </div>

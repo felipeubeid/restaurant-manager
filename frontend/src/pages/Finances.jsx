@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import FinancesSummary from '@/components/FinancesSummary'
+import FinancesTransactions from '@/components/FinancesTransactions'
 
 const finances = [
   {
@@ -14,23 +15,86 @@ const finances = [
     },
     recentTransactions: [
       {
-        type: "sale",
+        category: "sale",
+        income: true,
         amount: 75.00,
         description: "Order #1034",
-        date: "2025-06-14"
+        date: "2025-06-14",
+        manualEntry: true
       },
       {
-        type: "expense",
+        category: "inventory",
+        income: false,
         amount: 120.50,
         description: "Food Supplier - Vegetables",
-        date: "2025-06-13"
+        date: "2025-06-13",
+        manualEntry: false
       },
       {
-        type: "sale",
+        category: "sale",
+        income: true,
         amount: 60.00,
         description: "Order #1033",
-        date: "2025-06-13"
+        date: "2025-06-13",
+        manualEntry: false
+      },
+      {
+        category: "sale",
+        income: true,
+        amount: 26.00,
+        description: "Order #1035",
+        date: "2025-06-14",
+        manualEntry: true
+      },
+      {
+        category: "sale",
+        income: true,
+        amount: 34.00,
+        description: "Order #1036",
+        date: "2025-06-14",
+        manualEntry: true
+      },
+      {
+        category: "utilities",
+        income: false,
+        amount: 320.70,
+        description: "Electric Bill",
+        date: "2025-06-13",
+        manualEntry: false
+      },
+      {
+        category: "payroll",
+        income: false,
+        amount: 210,
+        description: "Alice Johnson Payroll",
+        date: "2025-06-13",
+        manualEntry: false
+      },
+      {
+        category: "sale",
+        income: true,
+        amount: 12.00,
+        description: "Order #1037",
+        date: "2025-06-14",
+        manualEntry: true
+      },
+      {
+        category: "sale",
+        income: true,
+        amount: 53.00,
+        description: "Order #1038",
+        date: "2025-06-14",
+        manualEntry: true
+      },
+      {
+        category: "sale",
+        income: true,
+        amount: 18.00,
+        description: "Order #1039",
+        date: "2025-06-13",
+        manualEntry: false
       }
+      
     ],
     expenseCategories: [
       {
@@ -87,9 +151,18 @@ const Finances = () => {
           </Link>
         </div>
         <div className="px-4 space-y-6">
-          {finances.map(({ summary }, index) => (
-              finances.length > 0 && (<FinancesSummary key={index} summary={summary} />)
-            ))}
+          {finances.map(({ summary, recentTransactions }, index) => (
+            // Can't return two components directly from map
+            // Need to wrap them in a React.Fragment 
+            <React.Fragment key={index}>
+              {summary && Object.keys(summary).length > 0 && (
+                <FinancesSummary summary={summary} />
+              )}
+              {recentTransactions && recentTransactions.length > 0 && (
+                <FinancesTransactions transactions={recentTransactions} />
+              )}
+            </React.Fragment>
+          ))}
         </div>
       </div>
     </div>
