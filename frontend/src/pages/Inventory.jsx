@@ -83,13 +83,13 @@ const Inventory = () => {
             <h1 className="text-3xl font-bold text-foreground">Inventory</h1>
             <p className="text-muted-foreground">Track and manage restaurant inventory</p>
           </div>
-          <Link to ={'/add-menu-item'}>
+          <Link to ={'/add-inventory-item'}>
             <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" /> Add Item
             </Button>
           </Link>
         </div>
-        <div className="space-y-6 px-4">
+        <div className="px-4 space-y-6">
           <InventoryList inventory={inventory}></InventoryList>
         </div>
       </div>

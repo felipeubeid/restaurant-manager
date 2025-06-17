@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
+import { TableCell, TableRow} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -20,7 +20,7 @@ const InventoryItem = ({item}) => {
         <TableCell>${item.totalCost.toFixed(2)}</TableCell>
         <TableCell className="text-center">
             <div className="flex justify-center gap-2">
-                <Link to={`/edit-menu-item/${item.id}`}>
+                <Link to={`/edit-inventory-item/${item.id}`}>
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
                     <Edit className="h-4 w-4" />
                     </Button>

@@ -1,12 +1,11 @@
 import React from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import InventoryItem from './InventoryItem'
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 const InventoryList = ({inventory}) => {
   return (
-	<ScrollArea className="w-full rounded-md border bg-white shadow-none px-4 py-1">
-		<Table className="min-w-[700px]">
+	<div className="rounded-xl border bg-white shadow-none px-4 py-1">
+		<Table>
 			<TableHeader>
 				<TableRow className="text-center">
 					<TableHead>Name</TableHead>
@@ -24,7 +23,7 @@ const InventoryList = ({inventory}) => {
 				))}
 			</TableBody>
 		</Table>
-	</ScrollArea>
+	</div>
   )
 }
 
