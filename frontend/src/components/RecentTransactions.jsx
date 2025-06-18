@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Edit, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import FinancesEditModal from '@/components/modals/FinancesEditModal'
 
 const RecentTransactions = ({transactions}) => {
     const [showAll, setShowAll] = useState(false)
@@ -40,12 +41,7 @@ const RecentTransactions = ({transactions}) => {
                             <TableCell className="text-center">
                                 {transaction.manualEntry ? (
                                 <div className="flex justify-center gap-2">
-                                    <Link to={`/edit-transaction/${transaction.id}`}>
-                                        <Button size="sm" variant="outline" 
-										className="h-8 w-8 p-0 shadow-none">
-                                        <Edit className="h-4 w-4" />
-                                        </Button>
-                                    </Link>
+                                    <FinancesEditModal transaction={transaction}/>
                                     <Button size="sm" variant="outline" 
 									className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shadow-none">
                                         <Trash2 className="h-4 w-4" />

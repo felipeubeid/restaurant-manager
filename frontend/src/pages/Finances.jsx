@@ -6,6 +6,7 @@ import FinancesSummary from '@/components/FinancesSummary'
 import RecentTransactions from '@/components/RecentTransactions'
 import ExpenseCategories from '@/components/ExpenseCategories'
 import RevenueCategories from '@/components/RevenueCategories'
+import FinancesAddModal from '@/components/modals/FinancesAddModal'
 
 const finances = [
   {
@@ -17,7 +18,7 @@ const finances = [
     },
     recentTransactions: [
       {
-        category: "sale",
+        category: "Sale",
         income: true,
         amount: 75.00,
         description: "Order #1034",
@@ -25,23 +26,23 @@ const finances = [
         manualEntry: true
       },
       {
-        category: "inventory",
+        category: "Inventory",
         income: false,
         amount: 120.50,
         description: "Food Supplier - Vegetables",
-        date: "2025-06-13",
+        date: "2025-06-12",
         manualEntry: false
       },
       {
-        category: "sale",
+        category: "Sale",
         income: true,
         amount: 60.00,
         description: "Order #1033",
-        date: "2025-06-13",
+        date: "2025-06-11",
         manualEntry: false
       },
       {
-        category: "sale",
+        category: "Sale",
         income: true,
         amount: 26.00,
         description: "Order #1035",
@@ -49,47 +50,47 @@ const finances = [
         manualEntry: true
       },
       {
-        category: "sale",
+        category: "Sale",
         income: true,
         amount: 34.00,
         description: "Order #1036",
-        date: "2025-06-14",
+        date: "2025-06-16",
         manualEntry: true
       },
       {
-        category: "utilities",
+        category: "Utilities",
         income: false,
         amount: 320.70,
         description: "Electric Bill",
-        date: "2025-06-13",
+        date: "2025-06-12",
         manualEntry: false
       },
       {
-        category: "payroll",
+        category: "Payroll",
         income: false,
         amount: 210,
         description: "Alice Johnson Payroll",
-        date: "2025-06-13",
-        manualEntry: false
+        date: "2025-06-11",
+        manualEntry: false,
       },
       {
-        category: "sale",
+        category: "Sale",
         income: true,
         amount: 12.00,
         description: "Order #1037",
-        date: "2025-06-14",
-        manualEntry: true
+        date: "2025-06-15",
+        manualEntry: true,
       },
       {
-        category: "sale",
-        income: true,
+        category: "Utilities",
+        income: false,
         amount: 53.00,
         description: "Order #1038",
-        date: "2025-06-14",
-        manualEntry: true
+        date: "2025-06-16",
+        manualEntry: true,
       },
       {
-        category: "sale",
+        category: "Sale",
         income: true,
         amount: 18.00,
         description: "Order #1039",
@@ -145,11 +146,7 @@ const Finances = () => {
             <h1 className="text-3xl font-bold text-foreground">Finances</h1>
             <p className="text-muted-foreground">Revenue, expenses, and financial performance at a glance</p>
           </div>
-          <Link to ={'/add-transaction'}>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Add Transaction
-            </Button>
-          </Link>
+          <FinancesAddModal />
         </div>
         <div className="space-y-6">
           {finances.map(({ summary, recentTransactions, expenseCategories, revenueByCategory }, index) => (
