@@ -38,7 +38,7 @@ const AppSidebar = () => {
       {/* Sidebar */}
       <aside className={`bg-white border-r border-gray-300 shadow-sm h-screen transition-all duration-500 flex flex-col overflow-hidden ${
       isOpen ? window.innerWidth < 768 ? 
-        'fixed top-0 left-0 w-full h-full z-50' // Fullscreen
+        'fixed top-0 left-0 w-64 h-full z-50' // Fullscreen
         : 'w-64' // Desktop expanded 
         : 'w-0' // Collapsed 
         }`}>
