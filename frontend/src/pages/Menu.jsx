@@ -3,6 +3,7 @@ import MenuCategory from '@/components/MenuCategory'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import MenuAddModal from '@/components/modals/MenuAddModal'
 
 const menuData = [
   {
@@ -21,7 +22,7 @@ const menuData = [
   },
   {
     id: 2,
-    category: "Main Course",
+    category: "Entrées",
     items: [
       {
         id: 1,
@@ -43,7 +44,7 @@ const menuData = [
   },
   {
     id: 3,
-    category: "Side",
+    category: "Sides",
     items: [
       {
         id: 4,
@@ -74,11 +75,7 @@ const Menu = () => {
             <h1 className="text-3xl font-bold text-foreground">Menu Management</h1>
             <p className="text-muted-foreground">Manage menu items, prices, and availability</p>
           </div>
-          <Link to ={'/add-menu-item'}>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Add Item
-            </Button>
-          </Link>
+          <MenuAddModal />
         </div>
         <div className="space-y-6">
           {menuData.map(({ id, category, items }) => (

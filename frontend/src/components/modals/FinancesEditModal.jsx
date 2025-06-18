@@ -11,7 +11,7 @@ import { Edit } from 'lucide-react'
 const FinancesEditModal = ({transaction}) => {
   const [type, setType] = useState(transaction.income ? "income" : "expense")
   const [category, setCategory] = useState(transaction.category || "")
-  const [amount, setAmount] = useState(transaction.amount || "")
+  const [amount, setAmount] = useState(transaction.amount?.toString() || "")
   const [date, setDate] = useState(transaction.date || new Date().toISOString().slice(0, 10))
   const [description, setDescription] = useState(transaction.description || "")
   
@@ -22,12 +22,12 @@ const FinancesEditModal = ({transaction}) => {
   
   return (
     <Dialog onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        setType(transaction.income ? "income" : "expense")
-        setCategory(transaction.category || "")
-        setAmount(transaction.amount || "")
-        setDate(transaction.date || new Date().toISOString().slice(0, 10))
-        setDescription(transaction.description || "")
+      if (isOpen) {
+        setType(transaction?.income ? "income" : "expense")
+        setCategory(transaction?.category || "")
+        setAmount(transaction?.amount?.toString() || "")
+        setDate(transaction?.date || new Date().toISOString().slice(0, 10))
+        setDescription(transaction?.description || "")
       }
     }}>
       <DialogTrigger asChild>
@@ -37,7 +37,7 @@ const FinancesEditModal = ({transaction}) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md flex flex-col">
         <DialogHeader>
-          <DialogTitle>Add New Transaction</DialogTitle>
+          <DialogTitle>Edit Transaction</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
@@ -110,7 +110,7 @@ const FinancesEditModal = ({transaction}) => {
         </div>
 
         <DialogFooter>
-            <Button type="submit">Add</Button>
+            <Button type="submit">Save</Button>
         </DialogFooter>
 
       </DialogContent>

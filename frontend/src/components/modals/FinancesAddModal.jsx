@@ -42,7 +42,6 @@ const FinancesAddModal = () => {
         <DialogHeader>
           <DialogTitle>Add New Transaction</DialogTitle>
         </DialogHeader>
-
         <div className="grid gap-4 py-4">
           {/* Transaction Type */}
           <div className="flex justify-center">

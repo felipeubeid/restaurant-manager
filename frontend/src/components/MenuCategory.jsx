@@ -10,7 +10,7 @@ const MenuCategory = ({category, items}) => {
                 <CardTitle className="text-xl">{category}</CardTitle>
             </CardHeader>
             <CardContent>
-                <MenuItem items={items}></MenuItem>
+                <MenuItem items={items} category={category}></MenuItem>
             </CardContent>
         </Card>
     </div>

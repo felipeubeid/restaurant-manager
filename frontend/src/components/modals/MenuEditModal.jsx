@@ -1,0 +1,139 @@
+import React, { useState } from 'react'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from '@radix-ui/react-label'
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from '@/components/ui/checkbox'
+import { Edit } from "lucide-react"
+
+const MenuEditModal = ({item, itemCategory}) => {
+    const [category, setCategory] = useState(itemCategory || "")
+    const [name, setName] = useState(item?.name || "")
+    const [description, setDescription] = useState(item?.description || "")
+    const [price, setPrice] = useState(item?.price?.toString() || "")
+    const [cost, setCost] = useState(item?.cost?.toString() || "")
+    const [available, setAvailable] = useState(item?.available || false)
+  
+    const categories = ["Appetizers", "Entrées", "Sides", "Desserts", "Beverages"]
+  
+    return (
+      <Dialog onOpenChange={(isOpen) => {
+        if (isOpen) {
+        setCategory(itemCategory || "")
+        setName(item?.name || "")
+        setDescription(item?.description || "")
+        setPrice(item?.price?.toString() || "")
+        setCost(item?.cost?.toString() || "")
+        setAvailable(item?.available || false)
+        }}}>
+        <DialogTrigger asChild>
+            <Button size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
+            <Edit className="h-4 w-4" />
+            </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Edit Menu Item</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            { /* Category Selection */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="category" className="text-right">Category</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="col-span-3 shadow-none">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(categories).map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Name */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">Name</Label>
+              <div className="relative col-span-3">
+                <Input
+                  id="name"
+                  className="shadow-none"
+                  placeholder ="Item name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}/>
+              </div>
+            </div>
+  
+            {/* Description */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">Description</Label>
+              <Textarea 
+              id="description" 
+              placeholder="Item description..." 
+              className="col-span-3 shadow-none" 
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}/>
+            </div>
+  
+            {/* Price */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="price" className="text-right">Price</Label>
+                <div className="relative col-span-3">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-sm text-gray-500 pointer-events-none">
+                    $ </span>
+                  <Input
+                    id="price"
+                    className="pl-7 shadow-none"
+                    type="number"
+                    inputMode="decimal"
+                    placeholder ="0.00"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}/>
+                </div>
+            </div>
+  
+            {/* Cost */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="cost" className="text-right">Cost</Label>
+                <div className="relative col-span-3">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-sm text-gray-500 pointer-events-none">
+                    $ </span>
+                  <Input
+                    id="cost"
+                    className="pl-7 shadow-none"
+                    type="number"
+                    inputMode="decimal"
+                    placeholder ="0.00"
+                    value={cost}
+                    onChange={(e) => setCost(e.target.value)}/>
+                </div>
+            </div>
+            
+            {/* Available */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="available" className="text-right">Available</Label>
+                <div className="relative col-span-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                    id="available" 
+                    className="shadow-none border-lg"
+                    checked={available}
+                    onCheckedChange={setAvailable}
+                    />
+                  </div>
+                </div>
+            </div>
+          </div>
+  
+          <DialogFooter>
+              <Button type="submit">Save</Button>
+          </DialogFooter>
+  
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+export default MenuEditModal

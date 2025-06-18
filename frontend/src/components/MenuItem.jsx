@@ -3,9 +3,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import MenuEditModal from './modals/MenuEditModal'
 
-const MenuItem = ({ items }) => {
+const MenuItem = ({ items, category }) => {
   return (
     <div className="grid gap-6">
         {items.map((item, index) => (
@@ -27,14 +28,7 @@ const MenuItem = ({ items }) => {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2">
                         <div className="text-lg font-semibold">${item.price}</div>
                         <div className="flex gap-2">
-                            <Link to={`/edit-menu-item/${item.id}`}>
-                                <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="h-8 w-8 p-0 shadow-none">
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-                            </Link>
+                            <MenuEditModal item={item} itemCategory={category}/>
                             <Button 
                             size="sm"
                             variant="outline"
