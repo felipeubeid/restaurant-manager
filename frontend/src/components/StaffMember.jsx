@@ -16,11 +16,11 @@ const StaffMember = ({emp}) => {
 
     return (
         <Card key={emp.index} className="shadow-none hover:bg-muted/30 transition-all">
-            <CardHeader className>
+            <CardHeader className="space-y-3">
                 <div className="flex items-center gap-3">
                     <div className="flex-1">
                         <CardTitle className="text-gray-500">{emp.name}</CardTitle>
-                        <div className="flex gap-2 mt-1">
+                        <div className="flex gap-2 mt-2">
                             <Badge className={`${statusClass} shadow-none`}>
                                 {emp.status}
                             </Badge>
@@ -31,7 +31,6 @@ const StaffMember = ({emp}) => {
                     </div>
                 </div>
             </CardHeader>
-            
             <CardContent className="space-y-3">
                 <div className="text-sm">
                     <span className="text-gray-500">Shift: </span>

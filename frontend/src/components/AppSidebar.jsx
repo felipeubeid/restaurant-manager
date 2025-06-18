@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStroopwafel } from '@fortawesome/free-solid-svg-icons'
 import { NavLink } from 'react-router-dom'
 
-const Sidebar = () => {
+const AppSidebar = () => {
   const navItems = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/finances', icon: BarChart3, label: 'Finances' },
@@ -94,4 +94,4 @@ const Sidebar = () => {
   )
 }
 
-export default Sidebar
+export default AppSidebar

@@ -6,7 +6,7 @@ import { Edit, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 
-const FinancesTransactions = ({transactions}) => {
+const RecentTransactions = ({transactions}) => {
     const [showAll, setShowAll] = useState(false)
   	const visibleTransactions = showAll ? transactions : transactions.slice(0, 6)
   	return (
@@ -33,8 +33,8 @@ const FinancesTransactions = ({transactions}) => {
                             <TableCell className="font-medium">{transaction.description}</TableCell>
                             <TableCell className="capitalize">{transaction.category}</TableCell>
 							<TableCell className={transaction.income ? 
-							"text-green-600 break-words" :
-							"text-red-600 break-words"}>
+							"text-green-600 break-words font-medium" :
+							"text-red-600 break-words font-medium"}>
 								{transaction.income ? '+' : '-'}${transaction.amount.toFixed(2)}
 							</TableCell>
                             <TableCell className="text-center">
@@ -74,4 +74,4 @@ const FinancesTransactions = ({transactions}) => {
 	)
 }
 
-export default FinancesTransactions
+export default RecentTransactions

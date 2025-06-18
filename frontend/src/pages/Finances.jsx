@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import FinancesSummary from '@/components/FinancesSummary'
-import FinancesTransactions from '@/components/FinancesTransactions'
+import RecentTransactions from '@/components/RecentTransactions'
+import ExpenseCategories from '@/components/ExpenseCategories'
+import RevenueCategories from '@/components/RevenueCategories'
 
 const finances = [
   {
@@ -137,9 +139,8 @@ const finances = [
 
 const Finances = () => {
   return (
-    <div>
-      <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 px-4 gap-3">
+    <div className="space-y-6 px-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 gap-3">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Finances</h1>
             <p className="text-muted-foreground">Revenue, expenses, and financial performance at a glance</p>
@@ -150,8 +151,8 @@ const Finances = () => {
             </Button>
           </Link>
         </div>
-        <div className="px-4 space-y-6">
-          {finances.map(({ summary, recentTransactions }, index) => (
+        <div className="space-y-6">
+          {finances.map(({ summary, recentTransactions, expenseCategories, revenueByCategory }, index) => (
             // Can't return two components directly from map
             // Need to wrap them in a React.Fragment 
             <React.Fragment key={index}>
@@ -159,12 +160,19 @@ const Finances = () => {
                 <FinancesSummary summary={summary} />
               )}
               {recentTransactions && recentTransactions.length > 0 && (
-                <FinancesTransactions transactions={recentTransactions} />
+                <RecentTransactions transactions={recentTransactions} />
               )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {recentTransactions && recentTransactions.length > 0 && (
+                  <ExpenseCategories expenses={expenseCategories} />
+                )}
+                {recentTransactions && recentTransactions.length > 0 && (
+                  <RevenueCategories revenues={revenueByCategory} />
+                )}
+              </div>
             </React.Fragment>
           ))}
         </div>
-      </div>
     </div>
   )
 }

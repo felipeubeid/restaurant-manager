@@ -65,9 +65,8 @@ const staff = [
 
 const Staff = () => {
   return (
-    <div>
-      <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 px-4 gap-3">
+    <div className="space-y-6 px-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 gap-3">
 
           <div>
             <h1 className="text-3xl font-bold text-foreground">Staff Management</h1>
@@ -79,14 +78,13 @@ const Staff = () => {
             </Button>
           </Link>
         </div>
-        <div className="px-4">
+        <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {staff.map((emp) => (
               staff.length > 0 && (<StaffMember key={emp.id} emp={emp} />)
             ))}
           </div>
         </div>
-      </div>
     </div>
   )
 }

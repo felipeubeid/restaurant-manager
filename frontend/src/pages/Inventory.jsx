@@ -76,9 +76,8 @@ const inventory = [
 
 const Inventory = () => {
   return (
-    <div>
-      <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 px-4 gap-3">
+    <div className="space-y-6 px-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 gap-3">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Inventory</h1>
             <p className="text-muted-foreground">Track and manage restaurant inventory</p>
@@ -89,10 +88,9 @@ const Inventory = () => {
             </Button>
           </Link>
         </div>
-        <div className="px-4 space-y-6">
+        <div className="space-y-6">
           <InventoryList inventory={inventory}></InventoryList>
         </div>
-      </div>
     </div>
   )
 }
