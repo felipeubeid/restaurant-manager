@@ -5,6 +5,7 @@ import { Clock, DollarSign, Coins } from 'lucide-react'
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import StaffEditModal from './modals/StaffEditModal';
 
 const statusColors = {
     Active: "!bg-green-100 !text-green-600",
@@ -62,12 +63,7 @@ const StaffMember = ({emp}) => {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Link to={'/edit-staff-member/${emp.id}'}>
-                        <Button size="sm" variant="outline" 
-                        className="h-8 w-8 p-0 shadow-none">
-                            <Edit className="h-4 w-4" />
-                        </Button>
-                    </Link>
+                    <StaffEditModal emp={emp} />
                     <Button size="sm" variant="outline" 
                         className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shadow-none">
                             <Trash2 className="h-4 w-4" />

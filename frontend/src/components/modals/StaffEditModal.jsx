@@ -4,36 +4,41 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from '@radix-ui/react-label'
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Plus } from "lucide-react"
+import { Checkbox } from '@/components/ui/checkbox'
+import { Edit } from "lucide-react"
 
-const StaffAddModal = () => {
-  const [name, setName] = useState("")
-  const [role, setRole] = useState("")
-  const [wage, setWage] = useState("")
-  const [contact, setContact] = useState("")
-  const [days, setDays] = useState([])
-  const [shiftStart, setShiftStart] = useState()
-  const [shiftEnd, setShiftEnd] = useState()
+const StaffEditModal = ({emp}) => {
+  const [name, setName] = useState(emp?.name || "")
+  const [role, setRole] = useState(emp?.role || "")
+  const [wage, setWage] = useState(emp?.wage?.toString() || "")
+  const [contact, setContact] = useState(emp?.contact || "")
+  const [hours, setHours] = useState(emp?.hours?.toString() || "")
+  const [days, setDays] = useState(emp?.days || [])
+  const [shiftStart, setShiftStart] = useState(emp?.shift?.start || "")
+  const [shiftEnd, setShiftEnd] = useState(emp?.shift?.end || "")
+  const [available, setAvailable] = useState(emp?.status === "Active")
 
   return (
     <Dialog onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        setName("")
-        setRole("")
-        setWage("")
-        setContact("")
-        setDays([])
-        setShiftStart("")
-        setShiftEnd("")
-      }}}>
+    if (!isOpen) {
+      setName(emp?.name || "")
+      setRole(emp?.role || "")
+      setWage(emp?.wage?.toString() || "")
+      setContact(emp?.contact || "")
+      setHours(emp?.hours?.toString() || "")
+      setDays(emp?.days || [])
+      setShiftStart(emp?.shift?.start || "")
+      setShiftEnd(emp?.shift?.end || "")
+      setAvailable(emp?.status === "Active")
+    }}}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add Staff Member
+        <Button size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
+          <Edit className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md flex flex-col">
         <DialogHeader>
-          <DialogTitle>Add New Staff Member</DialogTitle>
+          <DialogTitle>Edit Staff Member Info</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
 
@@ -143,8 +148,33 @@ const StaffAddModal = () => {
           </div>
         </div>
 
+        {/* Availability and Hours */}
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="available" className="text-right">Available</Label>
+          <div className="col-span-3 flex items-center gap-4">
+            <Checkbox
+              id="available"
+              className="shadow-none border-lg"
+              checked={available}
+              onCheckedChange={setAvailable}
+            />
+            <div className="flex items-center gap-2 ml-4">
+              <Label htmlFor="hours">Hours</Label>
+              <Input
+                id="hours"
+                type="number"
+                inputMode="decimal"
+                className="w-20 shadow-none"
+                placeholder="0"
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
         <DialogFooter>
-          <Button type="submit">Add</Button>
+          <Button type="submit">Save</Button>
         </DialogFooter>
 
       </DialogContent>
@@ -152,4 +182,4 @@ const StaffAddModal = () => {
   )
 }
 
-export default StaffAddModal
+export default StaffEditModal
