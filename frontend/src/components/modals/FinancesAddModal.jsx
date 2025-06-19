@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus } from "lucide-react"
+import { Checkbox } from '@/components/ui/checkbox'
 
 const FinancesAddModal = () => {
   const [type, setType] = useState("expense")
@@ -22,6 +23,13 @@ const FinancesAddModal = () => {
   const categories = {
     income: ["Sale", "Other"],
     expense: ["Inventory", "Payroll", "Utilities", "Maintenance", "Other"],
+  }
+
+  const handleTypeChange = (selectedType) => {
+    if (type !== selectedType) {
+      setType(selectedType)
+      setCategory("") // reset category when type changes
+    }
   }
   
   return (
@@ -43,21 +51,27 @@ const FinancesAddModal = () => {
           <DialogTitle>Add New Transaction</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          
           {/* Transaction Type */}
-          <div className="flex justify-center">
-            <ToggleGroup 
-            type="single" 
-            value={type}
-            onValueChange={(val) => {
-              if (val) {
-                setType(val)
-                setCategory("") // reset category when type changes
-              }
-            }}
-            className="gap-2">
-              <ToggleGroupItem value="income" aria-label="Income">Income</ToggleGroupItem>
-              <ToggleGroupItem value="expense" aria-label="Expense">Expense</ToggleGroupItem>
-            </ToggleGroup>
+          <div className="flex justify-center gap-6">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="income"
+                className="shadow-none border-lg"
+                checked={type === "income"}
+                onCheckedChange={() => handleTypeChange("income")}
+              />
+              <Label htmlFor="income">Income</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="expense"
+                className="shadow-none border-lg"
+                checked={type === "expense"}
+                onCheckedChange={() => handleTypeChange("expense")}
+              />
+              <Label htmlFor="expense">Expense</Label>
+            </div>
           </div>
 
           {/* Date */}

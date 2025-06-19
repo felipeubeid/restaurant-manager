@@ -38,6 +38,7 @@ const MenuAddModal = () => {
           <DialogTitle>Add New Menu Item</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          
           { /* Category Selection */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="category" className="text-right">Category</Label>

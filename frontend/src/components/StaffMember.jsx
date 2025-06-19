@@ -33,8 +33,8 @@ const StaffMember = ({emp}) => {
             </CardHeader>
             <CardContent className="space-y-3">
                 <div className="text-sm">
-                    <span className="text-gray-500">Shift: </span>
-                    <span className="font-medium">{emp.shift}</span>
+                    <span className="text-gray-500">Schedule: </span>
+                    <span className="font-medium">{emp.schedule}</span>
                 </div>
                 <div className="text-sm">
                     <span className="text-gray-500">Contact: </span>
