@@ -130,7 +130,9 @@ const FinancesAddModal = () => {
         </div>
 
         <DialogFooter>
-            <Button type="submit">Add</Button>
+          <Button type="submit">
+            <Plus className="h-4 w-4" />Add
+          </Button>
         </DialogFooter>
 
       </DialogContent>
