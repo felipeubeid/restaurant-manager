@@ -1,9 +1,8 @@
 import React from 'react'
 import { Card, CardHeader, CardDescription, CardContent, CardTitle } from '@/components/ui/card'
-import { Table, TableCell, TableHeader, TableRow, TableHead, TableBody} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Edit, Trash2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Table, TableCell, TableHeader, TableRow, TableHead, TableBody} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import FinancesEditModal from '@/components/modals/FinancesEditModal'
 

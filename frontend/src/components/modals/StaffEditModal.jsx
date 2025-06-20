@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Edit } from "lucide-react"
+import { Edit } from 'lucide-react'
 
 const StaffEditModal = ({emp}) => {
   const [name, setName] = useState(emp?.name || "")

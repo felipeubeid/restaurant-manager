@@ -1,9 +1,6 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import StaffMember from '@/components/StaffMember';
-import StaffAddModal from '@/components/modals/StaffAddModal';
+import StaffMember from '@/components/StaffMember'
+import StaffAddModal from '@/components/modals/StaffAddModal'
 
 const staff = [
   {

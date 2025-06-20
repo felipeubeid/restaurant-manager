@@ -1,5 +1,4 @@
 import React from 'react'
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card'
 import { ChartLine, Wallet, HandPlatter, Package2, TriangleAlert} from 'lucide-react'
 import StatsCard from '@/components/StatsCard'
 import InventoryStatsCard from '@/components/InventoryStatsCard'

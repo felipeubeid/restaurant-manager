@@ -1,7 +1,4 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import FinancesSummary from '@/components/FinancesSummary'
 import RecentTransactions from '@/components/RecentTransactions'
 import ExpenseCategories from '@/components/ExpenseCategories'

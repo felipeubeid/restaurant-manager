@@ -1,9 +1,5 @@
 import React from 'react'
-import InventoryItem from '@/components/InventoryItem'
 import InventoryList from '@/components/InventoryList'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import InventoryAddModel from '@/components/modals/InventoryAddModel'
 
 const inventory = [

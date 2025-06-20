@@ -1,6 +1,6 @@
 import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import MenuItem from './MenuItem';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import MenuItem from './MenuItem'
 
 const MenuCategory = ({category, items}) => {
   return (

@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Plus } from "lucide-react"
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Plus } from 'lucide-react'
 
 const StaffAddModal = () => {
   const [name, setName] = useState("")

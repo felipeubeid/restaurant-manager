@@ -1,16 +1,15 @@
 import React, { useState } from 'react'
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
-import { Textarea } from "@/components/ui/textarea"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus } from "lucide-react"
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Plus } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 
 const FinancesAddModal = () => {
-  const [type, setType] = useState("expense")
+  const [type, setType] = useState("")
   const [category, setCategory] = useState("")
   const [date, setDate] = useState(() => {
     // default to today's date
@@ -35,7 +34,7 @@ const FinancesAddModal = () => {
   return (
     <Dialog onOpenChange={(isOpen) => {
       if (!isOpen) {
-        setType("expense")
+        setType("")
         setCategory("")
         setAmount("")
         setDate(new Date().toISOString().slice(0, 10))

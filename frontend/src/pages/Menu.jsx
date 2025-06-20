@@ -1,8 +1,5 @@
 import React from 'react'
 import MenuCategory from '@/components/MenuCategory'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import MenuAddModal from '@/components/modals/MenuAddModal'
 
 const menuData = [

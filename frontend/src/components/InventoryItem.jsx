@@ -1,8 +1,8 @@
 import React from 'react'
-import { TableCell, TableRow} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { TableCell, TableRow} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
-import { Badge } from "@/components/ui/badge"
+import { Badge } from '@/components/ui/badge'
 import InventoryEditModal from './modals/InventoryEditModal'
 
 const InventoryItem = ({item}) => {

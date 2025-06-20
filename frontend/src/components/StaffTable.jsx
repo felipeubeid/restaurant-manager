@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card'
-import { Table, TableCell, TableHeader, TableRow, TableHead, TableBody} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge";
+import { Table, TableCell, TableHeader, TableRow, TableHead, TableBody} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 
 const StaffTable = ({staff}) => {
   return (

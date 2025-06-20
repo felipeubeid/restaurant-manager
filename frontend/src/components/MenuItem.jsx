@@ -1,8 +1,7 @@
 import React from 'react'
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Edit, Trash2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Trash2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import MenuEditModal from './modals/MenuEditModal'
 

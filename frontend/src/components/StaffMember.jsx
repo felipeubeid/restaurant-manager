@@ -1,11 +1,10 @@
 import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Clock, DollarSign, Coins } from 'lucide-react'
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import StaffEditModal from './modals/StaffEditModal';
+import { Button } from '@/components/ui/button'
+import { Edit, Trash2 } from 'lucide-react'
+import StaffEditModal from './modals/StaffEditModal'
 
 const statusColors = {
     Active: "!bg-green-100 !text-green-600",
