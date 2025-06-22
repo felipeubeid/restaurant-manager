@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import OrderCard from '@/components/ui/OrderCard'
+import OrdersAddModal from '@/components/modals/OrdersAddModal'
 
 const orders = [
   {
@@ -79,11 +80,7 @@ const Orders = () => {
             <h1 className="text-3xl font-bold text-foreground">Orders</h1>
             <p className="text-muted-foreground">Track and review all restaurant orders</p>
           </div>
-          <Link to ={'/add-order'}>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Add Order
-            </Button>
-          </Link>
+          <OrdersAddModal />
         </div>
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
