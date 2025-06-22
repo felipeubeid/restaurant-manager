@@ -81,7 +81,7 @@ const InventoryAddModel = () => {
 
           {/* Cost */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="totalCost" className="text-right">Cost</Label>
+            <Label htmlFor="totalCost" className="text-right">Total Cost</Label>
               <div className="relative col-span-3">
                 <span className="absolute inset-y-0 left-3 flex items-center text-sm text-gray-500 pointer-events-none">
                   $ </span>

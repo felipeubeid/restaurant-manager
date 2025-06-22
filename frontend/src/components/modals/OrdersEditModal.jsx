@@ -5,7 +5,8 @@ import { Label } from '@radix-ui/react-label'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { Plus, Minus } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Plus, Minus, Edit } from 'lucide-react'
 
   const staff = [
   { id: 1, name: "Alice Johnson", role: "Server", status: "Active" },
@@ -16,21 +17,23 @@ import { Plus, Minus } from 'lucide-react'
   ];
 
   const menuData = [
-    { id: 2, name: "Caesar Salad", cost: 2.10, price: 7.50, available: true },
-    { id: 1, name: "Margherita Pizza", cost: 4.25, price: 12.00, available: true },
+    { id: 1, name: "Caesar Salad", cost: 2.10, price: 7.50, available: true },
+    { id: 2, name: "Margherita Pizza", cost: 4.25, price: 12.00, available: true },
     { id: 3, name: "Spaghetti Carbonara", cost: 3.90, price: 13.00, available: true },
     { id: 4, name: "Bruschetta", cost: 1.20, price: 6.00, available: true },
     { id: 5, name: "Garlic Bread", cost: 0.90, price: 3.00, available: true },
   ]
 
-const OrdersAddModal = () => {
-  const [type, setType] = useState("")
-  const [server, setServer] = useState("")
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
-  const [orderItems, setOrderItems] = useState([])
-  const [total, setTotal] = useState(0)
+const OrdersEditModal = ({order}) => {
+  const [type, setType] = useState(order?.isTakeout ? "takeout" : "dineIn")
+  const [server, setServer] = useState(order?.server || "")
+  const [date, setDate] = useState(order?.date || new Date().toISOString().slice(0, 10))
+  const [orderItems, setOrderItems] = useState(order?.items || [])
+  const [total, setTotal] = useState(order?.total || 0)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedItemId, setSelectedItemId] = useState(null)
+  const [orderNumber, setOrderNumber] = useState(order?.orderNumber || "")
+  const [completed, setCompleted] = useState(order?.completed || false)
 
   // Update total whenever orderItems change
   useEffect(() => {
@@ -74,23 +77,25 @@ const OrdersAddModal = () => {
     return (
     <Dialog onOpenChange={(isOpen) => {
       if (!isOpen) {
-        setType("")
-        setServer("")
-        setDate(new Date().toISOString().slice(0, 10))
-        setOrderItems([])
-        setTotal(0)
+        setType(order?.isTakeout ? "takeout" : "dineIn")
+        setServer(order?.server || "")
+        setDate(order?.date || new Date().toISOString().slice(0, 10))
+        setOrderItems(order?.items || [])
+        setTotal(order?.total || 0)
         setSearchTerm("")
         setSelectedItemId(null)
+        setOrderNumber(order?.orderNumber || "")
+        setCompleted(order?.completed || false)
       }
     }}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add Order
+        <Button size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
+          <Edit className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md flex flex-col">
         <DialogHeader>
-          <DialogTitle>Add New Order</DialogTitle>
+          <DialogTitle>Edit Order</DialogTitle>
         </DialogHeader>
 
         {/* Dine In or Takeout */ }
@@ -125,7 +130,7 @@ const OrdersAddModal = () => {
             className="col-span-3 shadow-none"/>
         </div>
 
-        {/* Order Number
+        {/* Order Number */}
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="orderNumber" className="text-right">Order Number</Label>
             <div className="relative col-span-3">
@@ -140,7 +145,7 @@ const OrdersAddModal = () => {
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}/>
             </div>
-        </div> */}
+        </div>
 
         {/* Server */}
         <div className="grid grid-cols-4 items-center gap-4">
@@ -184,7 +189,7 @@ const OrdersAddModal = () => {
         // Order Items
         <div className="mb-3">
           <Label className="block text-center mb-4">Order Items</Label>
-          <div className="max-h-40 overflow-y-auto border rounded-xl p-2 px-4">
+          <div className="max-h-32 overflow-y-auto border rounded-xl p-2 px-4">
             {orderItems.map(item => (
               <div key={item.id} className="flex justify-between items-center text-sm py-1">
                 <div className="flex-1 truncate">{item.name}</div>
@@ -212,18 +217,30 @@ const OrdersAddModal = () => {
         </div>
         )}
         
-        {orderItems.length == 0 ? "" : (
-        // Order Total
-        <div className="flex justify-end mb-2">
-          <span className="font-bold">Total:</span>
-          <span className="ml-2">${total.toFixed(2)}</span>
+        <div className="flex items-center justify-between mb-2 px-1">
+          {/* // Completed Checkbox */}
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="completed"
+              checked={completed}
+              onCheckedChange={setCompleted}
+              className="shadow-none"
+            />
+            <Label htmlFor="completed">Completed</Label>
+          </div>
+          <div>
+            {/* Order Total */}
+            {orderItems.length == 0 ? "" : (
+            <div className="flex justify-end mb-2">
+              <span className="font-bold">Total:</span>
+              <span className="ml-2">${total.toFixed(2)}</span>
+            </div>
+            )}
+          </div>
         </div>
-        )}
 
         <DialogFooter>
-          <Button type="submit">
-            <Plus className="h-4 w-4" /> Add
-          </Button>
+          <Button type="submit">Save</Button>
         </DialogFooter>
 
       </DialogContent>
@@ -231,4 +248,4 @@ const OrdersAddModal = () => {
   )
 }
 
-export default OrdersAddModal
+export default OrdersEditModal
