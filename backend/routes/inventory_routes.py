@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import InventoryItem
+from models.inventory_models import InventoryItem
 from db import db
 
 inventory_bp = Blueprint('inventory', __name__) # Blueprint for inventory management routes

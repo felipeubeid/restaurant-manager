@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from models import InventoryItem
+from backend import InventoryItem
 
 home_bp = Blueprint('home', __name__)
 

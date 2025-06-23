@@ -1,5 +1,5 @@
 from config import create_app
-from routes.inventory import inventory_bp
+from routes.inventory_routes import inventory_bp
 from db import db
 
 app = create_app()
