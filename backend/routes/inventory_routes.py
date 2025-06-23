@@ -4,6 +4,18 @@ from db import db
 
 inventory_bp = Blueprint('inventory', __name__) # Blueprint for inventory management routes
 
+def is_valid_name(name):
+    return isinstance(name, str) and len(name.strip()) > 0
+
+def is_valid_quantity(q):
+    return isinstance(q, (int, float)) and q >= 0
+
+def is_valid_unit(unit):
+    return isinstance(unit, str) and len(unit.strip()) > 0
+
+def is_valid_cost(cost):
+    return isinstance(cost, (int, float)) and cost >= 0
+
 @inventory_bp.route('/inventory', methods=['GET'])
 def get_inventory():
     items = InventoryItem.query.all()
@@ -21,6 +33,17 @@ def add_inventory_item():
     missing = [field for field in required_fields if field not in data]
     if missing:
         return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
+    
+    if not is_valid_name(data["name"]):
+        return jsonify({"error": "Invalid name"}), 400
+    if not is_valid_quantity(data["quantity"]):
+        return jsonify({"error": "Quantity must be a non-negative number"}), 400
+    if not is_valid_unit(data["unit"]):
+        return jsonify({"error": "Invalid unit"}), 400
+    if not is_valid_cost(data["costPerUnit"]):
+        return jsonify({"error": "costPerUnit must be a non-negative number"}), 400
+    if not is_valid_quantity(data["minQuantity"]):
+        return jsonify({"error": "minQuantity must be a non-negative number"}), 400
 
     quantity = data["quantity"]
     cost_per_unit = data["costPerUnit"]
@@ -30,9 +53,9 @@ def add_inventory_item():
     in_stock = quantity >= min_quantity
 
     new_item = InventoryItem(
-        name=data["name"],
+        name=data["name"].strip(),
         quantity=quantity,
-        unit=data["unit"],
+        unit=data["unit"].strip(),
         cost_per_unit=cost_per_unit,
         total_cost=total_cost,
         min_quantity=min_quantity,
@@ -47,7 +70,7 @@ def add_inventory_item():
 
     return jsonify(new_item.to_dict()), 201
 
-# Update an existing inventory item
+# Update existing inventory item
 @inventory_bp.route('/inventory/<int:item_id>', methods=['PATCH'])
 def update_inventory_item(item_id):
     item = InventoryItem.query.get(item_id)
@@ -55,6 +78,17 @@ def update_inventory_item(item_id):
         return jsonify({"error": "Item not found"}), 404
 
     data = request.get_json()
+    
+    if "name" in data and not is_valid_name(data["name"]):
+        return jsonify({"error": "Invalid name"}), 400
+    if "quantity" in data and not is_valid_quantity(data["quantity"]):
+        return jsonify({"error": "Quantity must be a non-negative number"}), 400
+    if "unit" in data and not is_valid_unit(data["unit"]):
+        return jsonify({"error": "Invalid unit"}), 400
+    if "costPerUnit" in data and not is_valid_cost(data["costPerUnit"]):
+        return jsonify({"error": "costPerUnit must be a non-negative number"}), 400
+    if "minQuantity" in data and not is_valid_quantity(data["minQuantity"]):
+        return jsonify({"error": "minQuantity must be a non-negative number"}), 400
 
     item.name = data.get("name", item.name)
     item.quantity = data.get("quantity", item.quantity)
@@ -87,4 +121,4 @@ def delete_inventory_item(item_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-    return jsonify({"message": "Item deleted"}), 200
+    return jsonify({"message": "Item deleted successfully"}), 200

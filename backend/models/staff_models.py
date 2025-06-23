@@ -1,7 +1,7 @@
 from db import db
 
-class ShiftDays(db.Model):
-    __tablename__ = "shift_days"
+class ShiftDay(db.Model):
+    __tablename__ = "shift_day"
 
     id = db.Column(db.Integer, primary_key=True)
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
