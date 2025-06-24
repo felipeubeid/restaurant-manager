@@ -20,7 +20,7 @@ def is_valid_price(price):
 def is_valid_available(available):
     return isinstance(available, bool)
 
-@menu_bp.route('/menu/items', methods=['GET'])
+@menu_bp.route('/menu', methods=['GET'])
 def get_menu_categories():
     categories = MenuCategory.query.all()
     return jsonify({
@@ -29,7 +29,7 @@ def get_menu_categories():
         "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
     
-@menu_bp.route('/menu/items', methods=['POST'])
+@menu_bp.route('/menu', methods=['POST'])
 def add_menu_category():
     data = request.get_json()
     
@@ -70,7 +70,7 @@ def add_menu_category():
     
     return jsonify(new_item.to_dict()), 201
 
-@menu_bp.route('/menu/items/<int:item_id>', methods=['PATCH'])
+@menu_bp.route('/menu/<int:item_id>', methods=['PATCH'])
 def update_menu_item(item_id):    
     item = MenuItem.query.get(item_id)
     if not item:
@@ -118,7 +118,7 @@ def update_menu_item(item_id):
     
     return jsonify(item.to_dict()), 200
 
-@menu_bp.route('/menu/items/<int:item_id>', methods=['DELETE'])
+@menu_bp.route('/menu/<int:item_id>', methods=['DELETE'])
 def delete_menu_item(item_id):
     item = MenuItem.query.get(item_id)
     if not item:
@@ -132,3 +132,17 @@ def delete_menu_item(item_id):
         return jsonify({"error": str(e)}), 500
     
     return jsonify({"message": "Item deleted successfully"}), 200
+
+# Route to get all available menu items for orders
+@menu_bp.route('/menu/items', methods=['GET'])
+def get_available_menu_items():
+    items = MenuItem.query.filter_by(available=True).all()
+    return jsonify([
+        {
+            "id": item.id,
+            "name": item.name,
+            "price": item.price,
+            "available": item.available
+        }
+        for item in items
+    ])

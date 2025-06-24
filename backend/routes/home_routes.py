@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from models.inventory_models import InventoryItem
 from models.staff_models import StaffMember
+from datetime import datetime
 
 home_bp = Blueprint('home', __name__)
 
@@ -12,12 +13,19 @@ def get_inventory_stats():
     return jsonify({
         "totalInventoryItems": total_items,
         "lowStockItems": low_stock_items,
-        # add other stats
     })
 
 @home_bp.route('/stats/staff', methods=['GET'])
 def get_staff_stats():
-    active_staff = StaffMember.query.filter(StaffMember.is_active == True).count()
+    all_staff = StaffMember.query.all()
+
+    weekday_map = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    today = weekday_map[datetime.now().weekday()]
+    
+    active_staff = [
+        staff for staff in all_staff 
+        if today in [day.day for day in staff.days]
+    ]
     
     staff_list = []
     for staff in active_staff:

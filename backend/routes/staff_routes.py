@@ -72,27 +72,6 @@ def format_schedule(days, shift_start, shift_end):
     
     return f"{days_str}, {time_str}"
 
-def is_active_now(days, shift_start, shift_end):
-    # Order matches datetime.weekday() numbering
-    weekday_map = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    now = datetime.now() # Get current date and time
-    # now.weekday() returns 0 for Monday, 6 for Sunday
-    current_day = weekday_map[now.weekday()] 
-    
-    # Check if current day is in the list of active days
-    if current_day not in days:
-        return False
-    
-    shift_start_time = datetime.strptime(shift_start, "%H:%M").time()
-    shift_end_time = datetime.strptime(shift_end, "%H:%M").time()
-    current_time = now.time()
-    
-    # Check if current time is within the shift hours
-    if shift_start_time <= current_time <= shift_end_time:
-        return True
-    else:
-        return False
-
 def calculate_hours(shift_start, shift_end):
     start = datetime.strptime(shift_start, "%H:%M")
     end = datetime.strptime(shift_end, "%H:%M")
@@ -138,7 +117,6 @@ def add_staff_member():
     shift_end = data["shift_end"]
     wage = data["wage"]
     schedule = format_schedule(days, shift_start, shift_end)
-    is_active = is_active_now(days, shift_start, shift_end)
     hours = calculate_hours(shift_start, shift_end)
     earnings = round(wage * hours, 2)
     
@@ -147,7 +125,6 @@ def add_staff_member():
     new_member = StaffMember(
         name=data["name"].strip(),
         role=data["role"].strip(),
-        status=str(is_active),
         schedule=schedule,
         wage=wage,
         earnings=earnings,
@@ -222,7 +199,6 @@ def update_staff_member(staff_id):
         staff_member.days.extend([ShiftDay(day=day) for day in new_days])
           
     days_list = [day.day for day in staff_member.days]
-    staff_member.status = str(is_active_now(days_list, staff_member.shift_start, staff_member.shift_end))
     staff_member.schedule = format_schedule(days_list, staff_member.shift_start, staff_member.shift_end)
     staff_member.hours = calculate_hours(staff_member.shift_start, staff_member.shift_end)
     staff_member.earnings = round(staff_member.wage * staff_member.hours, 2)

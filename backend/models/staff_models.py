@@ -1,4 +1,5 @@
 from db import db
+from utils.staff_active_utils import is_active_now
 
 class ShiftDay(db.Model):
     __tablename__ = "shift_day"
@@ -16,7 +17,6 @@ class StaffMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(50), nullable=False)
-    status = db.Column(db.String(20), nullable=False)
     schedule = db.Column(db.String(100), nullable=False)
     wage = db.Column(db.Float, nullable=False)
     earnings = db.Column(db.Float, nullable=False)
@@ -30,17 +30,19 @@ class StaffMember(db.Model):
     days = db.relationship("ShiftDay", back_populates="staff", cascade="all, delete-orphan")
 
     def to_dict(self):
+        days_list = [day.day for day in self.days]
         return {
             "id": self.id,
             "name": self.name,
             "role": self.role,
-            "status": self.status,
+            # Check if the staff member is currently active dynamically
+            "is_active": is_active_now(days_list, self.shift_start, self.shift_end),
             "schedule": self.schedule,
             "wage": self.wage,
             "earnings": self.earnings,
             "contact": self.contact,
             "hours": self.hours,
-            "days": [day.day for day in self.days],
+            "days": days_list,
             "shift": {
                 "start": self.shift_start,
                 "end": self.shift_end
