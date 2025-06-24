@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.staff_models import StaffMember, ShiftDay
 from db import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 staff_bp = Blueprint('staff', __name__)  # Blueprint for staff management routes
 
@@ -105,7 +105,7 @@ def get_staff():
     return jsonify({
         "staff": [member.to_dict() for member in staff_members],
         "totalStaff": len(staff_members),
-        "lastUpdated": "2025-06-22T12:00:00Z"
+        "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
 
 @staff_bp.route('/staff', methods=['POST'])
@@ -175,49 +175,50 @@ def update_staff_member(staff_id):
     
     data = request.get_json()
     
-    if "name" in data and not is_valid_name(data["name"]):
-        return jsonify({"error": "Invalid name"}), 400
+    if "name" in data:
+        if not is_valid_name(data["name"]):
+            return jsonify({"error": "Invalid name"}), 400
+        staff_member.name = data["name"].strip()
 
-    if "role" in data and not is_valid_role(data["role"]):
-        return jsonify({"error": "Invalid role"}), 400
+    if "role" in data:
+        if not is_valid_role(data["role"]):
+            return jsonify({"error": "Invalid role"}), 400
+        staff_member.role = data["role"].strip()
 
-    if "contact" in data and not is_valid_contact(data["contact"]):
-        return jsonify({"error": "Invalid contact"}), 400
+    if "contact" in data:
+        if not is_valid_contact(data["contact"]):
+            return jsonify({"error": "Invalid contact"}), 400
+        staff_member.contact = data["contact"].strip()
 
-    if "wage" in data and not is_valid_wage(data["wage"]):
-        return jsonify({"error": "Wage must be a non-negative number"}), 400
+    if "wage" in data:
+        if not is_valid_wage(data["wage"]):
+            return jsonify({"error": "Wage must be a non-negative number"}), 400
+        staff_member.wage = data["wage"]
 
-    if "shift_start" in data and not is_valid_time(data["shift_start"]):
-        return jsonify({"error": "shift_start must be in HH:MM 24-hour format"}), 400
-
-    if "shift_end" in data and not is_valid_time(data["shift_end"]):
-        return jsonify({"error": "shift_end must be in HH:MM 24-hour format"}), 400
-    
-    if "days" in data:
-        if not data["days"] or not are_valid_days(data["days"]):
-            return jsonify({"error": f"Days must be a non-empty list containing only {sorted(VALID_DAYS)}"}), 400
-        
     shift_start = data.get("shift_start", staff_member.shift_start)
     shift_end = data.get("shift_end", staff_member.shift_end)
+
+    if "shift_start" in data:
+        if not is_valid_time(shift_start):
+            return jsonify({"error": "shift_start must be in HH:MM 24-hour format"}), 400
+
+    if "shift_end" in data:
+        if not is_valid_time(shift_end):
+            return jsonify({"error": "shift_end must be in HH:MM 24-hour format"}), 400
 
     if is_valid_time(shift_start) and is_valid_time(shift_end):
         if datetime.strptime(shift_start, "%H:%M").time() >= datetime.strptime(shift_end, "%H:%M").time():
             return jsonify({"error": "shift_end must be after shift_start"}), 400
-            
-    staff_member.name = data.get("name", staff_member.name).strip()
-    staff_member.role = data.get("role", staff_member.role).strip()
-    staff_member.contact = data.get("contact", staff_member.contact).strip()
-    staff_member.wage = data.get("wage", staff_member.wage)
+
     staff_member.shift_start = shift_start
     staff_member.shift_end = shift_end
-    
+
     if "days" in data:
         new_days = data["days"]
         if not new_days or not are_valid_days(new_days):
             return jsonify({"error": f"Days must be a non-empty list containing only {sorted(VALID_DAYS)}"}), 400
-        # Clear existing ShiftDay objects
+
         staff_member.days.clear()
-        # Add new ShiftDay instances
         staff_member.days.extend([ShiftDay(day=day) for day in new_days])
           
     days_list = [day.day for day in staff_member.days]

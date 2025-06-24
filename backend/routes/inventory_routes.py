@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.inventory_models import InventoryItem
 from db import db
+from datetime import datetime, timezone
 
 inventory_bp = Blueprint('inventory', __name__) # Blueprint for inventory management routes
 
@@ -22,7 +23,7 @@ def get_inventory():
     return jsonify({
         "inventory": [item.to_dict() for item in items],
         "totalItems": len(items),
-        "lastUpdated": "2025-06-22T12:00:00Z"
+        "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
 
 @inventory_bp.route('/inventory', methods=['POST'])
@@ -61,11 +62,12 @@ def add_inventory_item():
         min_quantity=min_quantity,
         in_stock=in_stock
     )
+    
     try:
         db.session.add(new_item)
         db.session.commit()
     except Exception as e:
-        db.session.rollback() # Rollback in case of error
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
     return jsonify(new_item.to_dict()), 201
@@ -79,28 +81,37 @@ def update_inventory_item(item_id):
 
     data = request.get_json()
     
-    if "name" in data and not is_valid_name(data["name"]):
-        return jsonify({"error": "Invalid name"}), 400
-    if "quantity" in data and not is_valid_quantity(data["quantity"]):
-        return jsonify({"error": "Quantity must be a non-negative number"}), 400
-    if "unit" in data and not is_valid_unit(data["unit"]):
-        return jsonify({"error": "Invalid unit"}), 400
-    if "costPerUnit" in data and not is_valid_cost(data["costPerUnit"]):
-        return jsonify({"error": "costPerUnit must be a non-negative number"}), 400
-    if "minQuantity" in data and not is_valid_quantity(data["minQuantity"]):
-        return jsonify({"error": "minQuantity must be a non-negative number"}), 400
+    if "name" in data:
+        if not is_valid_name(data["name"]):
+            return jsonify({"error": "Invalid name"}), 400
+        item.name = data["name"].strip()
 
-    item.name = data.get("name", item.name)
-    item.quantity = data.get("quantity", item.quantity)
-    item.unit = data.get("unit", item.unit)
-    item.cost_per_unit = data.get("costPerUnit", item.cost_per_unit)
-    item.min_quantity = data.get("minQuantity", item.min_quantity)
+    if "quantity" in data:
+        if not is_valid_quantity(data["quantity"]):
+            return jsonify({"error": "Quantity must be a non-negative number"}), 400
+        item.quantity = data["quantity"]
+
+    if "unit" in data:
+        if not is_valid_unit(data["unit"]):
+            return jsonify({"error": "Invalid unit"}), 400
+        item.unit = data["unit"].strip()
+
+    if "costPerUnit" in data:
+        if not is_valid_cost(data["costPerUnit"]):
+            return jsonify({"error": "costPerUnit must be a non-negative number"}), 400
+        item.cost_per_unit = data["costPerUnit"]
+
+    if "minQuantity" in data:
+        if not is_valid_quantity(data["minQuantity"]):
+            return jsonify({"error": "minQuantity must be a non-negative number"}), 400
+        item.min_quantity = data["minQuantity"]
 
     # Recalculate
     item.total_cost = round(item.quantity * item.cost_per_unit, 2)
     item.in_stock = item.quantity >= item.min_quantity
 
     try:
+        db.session.add(item)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -121,4 +132,4 @@ def delete_inventory_item(item_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-    return jsonify({"message": "Item deleted successfully"}), 200
+    return jsonify({"message": "Inventory item deleted successfully"}), 200

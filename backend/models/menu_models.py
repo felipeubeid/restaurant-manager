@@ -7,6 +7,7 @@ class MenuCategory(db.Model):
     category = db.Column(db.String(50), nullable=False)
 
     # Lets us access the items in this category
+    # A MenuCategory has many MenuItems
     items = db.relationship('MenuItem', back_populates='category', cascade="all, delete-orphan")
 
     def to_dict(self):
@@ -27,8 +28,10 @@ class MenuItem(db.Model):
     price = db.Column(db.Float, nullable=False)
     available = db.Column(db.Boolean, nullable=False, default=True)
 
+    # Foreign key to link this item to its category
     category_id = db.Column(db.Integer, db.ForeignKey('menu_categories.id'), nullable=False)
     # Lets us access the category this item belongs to
+    # MenuItem belongs to one MenuCategory
     category = db.relationship('MenuCategory', back_populates='items')
 
     def to_dict(self):
