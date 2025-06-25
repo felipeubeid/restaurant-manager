@@ -1,0 +1,210 @@
+from models.orders_models import Order, OrderItem
+from flask import Blueprint, jsonify, request
+from db import db
+from datetime import datetime, timezone
+
+orders_bp = Blueprint('orders', __name__)  # Blueprint for order management routes
+
+def is_valid_order_number(order_number):
+    return isinstance(order_number, int) and order_number > 0
+
+def is_valid_completed(completed):
+    return isinstance(completed, bool)
+
+def is_valid_date(date):
+    try:
+        datetime.strptime(date, "%Y-%m-%d")  # Check if date is in YYYY-MM-DD format
+        return True
+    except ValueError:
+        return False
+
+def is_valid_is_takeout(is_takeout):
+    return isinstance(is_takeout, bool)
+
+def is_valid_server(server):
+    return isinstance(server, str) and len(server.strip()) > 0
+
+def is_valid_name(name):
+    return isinstance(name, str) and len(name.strip()) > 0
+
+def is_valid_quantity(quantity):
+    return isinstance(quantity, int) and quantity > 0
+
+def is_valid_price(price):
+    return isinstance(price, (int, float)) and price >= 0
+
+def is_valid_items(items):
+    if not isinstance(items, list) or len(items) == 0:
+        return False
+    for item in items: # Check each item in the list
+        if not isinstance(item, dict):
+            return False
+        if not all(k in item for k in ("id", "name", "quantity", "price")):
+            return False
+        if not is_valid_name(item["name"]):
+            return False
+        if not is_valid_quantity(item["quantity"]):
+            return False
+        if not is_valid_price(item["price"]):
+            return False
+    return True
+
+def get_next_order_number():
+    # Get used numbers to avoid duplicates and find the next available order number
+    used_numbers = {order.order_number for order in Order.query.with_entities(Order.order_number).all()}
+
+    # Find the next available order number
+    next_order_number = 1
+    while next_order_number in used_numbers:
+        next_order_number += 1
+    return next_order_number
+
+def update_order_items(order, new_items_data):
+    # Existing items in the order
+    existing_items = {item.name.strip(): item for item in order.items}
+
+    for item_data in new_items_data:
+        name = item_data["name"].strip()
+        quantity = item_data["quantity"]
+        price = item_data["price"]
+
+        # If the item already exists in the order, update 
+        if name in existing_items:
+            existing_item = existing_items[name]
+            existing_item.quantity += quantity 
+            existing_item.price = price 
+            # Remove from order if quantity is zero or negative
+            if existing_item.quantity <= 0:
+                db.session.delete(existing_item)
+        # Add to order if it doesn't exist on it already
+        else:
+            if quantity > 0:
+                new_item = OrderItem(name=name, quantity=quantity, price=price)
+                order.items.append(new_item)
+
+    # Recalculate total
+    order.total = round(sum(item.quantity * item.price for item in order.items), 2)
+
+
+@orders_bp.route('/orders', methods=['GET'])
+def get_orders():
+    orders = Order.query.all()
+    return jsonify({
+        "orders": [order.to_dict() for order in orders],
+        "totalOrders": len(orders),
+        "lastUpdated": datetime.now(timezone.utc).isoformat()
+    })
+    
+@orders_bp.route('/orders', methods=['POST'])
+def create_order():
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    
+    required_fields = ["isTakeout", "date", "server", "items"]
+    missing = [field for field in required_fields if field not in data]
+    if missing:
+        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
+    
+    if not is_valid_is_takeout(data["isTakeout"]):
+        return jsonify({"error": "Invalid isTakeout"}), 400
+    if not is_valid_date(data["date"]):
+        return jsonify({"error": "Invalid date"}), 400
+    if not is_valid_server(data["server"]):
+        return jsonify({"error": "Invalid server"}), 400
+    if not is_valid_items(data["items"]):
+        return jsonify({"error": "Invalid items"}), 400
+    
+    order_number = get_next_order_number()
+    
+    order_items = [
+        OrderItem(name=item["name"].strip(), quantity=item["quantity"], price=item["price"])
+        for item in data["items"]
+    ]
+    
+    total = round(sum(item["quantity"] * item["price"] for item in data["items"]), 2)
+    
+    new_order = Order(
+        order_number=order_number,
+        total=total,
+        completed=True,
+        date=data["date"],
+        is_takeout=data["isTakeout"],
+        server=data["server"].strip(),
+        items=order_items
+    )
+    
+    try:
+        db.session.add(new_order)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+    return jsonify(new_order.to_dict()), 201
+
+@orders_bp.route('/orders/<int:order_id>', methods=['PATCH'])
+def update_order(order_id):
+    order = Order.query.get(order_id)
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+    
+    data = request.get_json()
+    
+    if "isTakeout" in data:
+        if not is_valid_is_takeout(data["isTakeout"]):
+            return jsonify({"error": "Invalid isTakeout"}), 400
+        order.is_takeout = data["isTakeout"]
+
+    if "date" in data:
+        if not is_valid_date(data["date"]):
+            return jsonify({"error": "Invalid date"}), 400
+        order.date = data["date"]
+
+    if "server" in data:
+        if not is_valid_server(data["server"]):
+            return jsonify({"error": "Invalid server"}), 400
+        order.server = data["server"].strip()
+
+    if "completed" in data:
+        if not is_valid_completed(data["completed"]):
+            return jsonify({"error": "Invalid completed flag"}), 400
+        order.completed = data["completed"]
+
+    if "items" in data:
+        if not is_valid_items(data["items"]):
+            return jsonify({"error": "Invalid items"}), 400
+        update_order_items(order, data["items"])
+    
+    if "orderNumber" in data:
+        if not is_valid_order_number(data["orderNumber"]):
+            return jsonify({"error": "Invalid order number"}), 400
+        # Check if another order already has this number
+        existing = Order.query.filter_by(order_number=data["orderNumber"]).first()
+        if existing and existing.id != order.id:
+            return jsonify({"error": "Order number already in use"}), 400
+        order.order_number = data["orderNumber"]
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify(order.to_dict()), 200
+
+@orders_bp.route('/orders/<int:order_id>', methods=['DELETE'])
+def delete_order(order_id):
+    order = Order.query.get(order_id)
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+    
+    try:
+        db.session.delete(order)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+    return jsonify({"message": "Order deleted successfully"}), 200

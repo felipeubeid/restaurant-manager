@@ -26,6 +26,7 @@ def get_menu_categories():
     return jsonify({
         "categories": [category.to_dict() for category in categories],
         "totalCategories": len(categories),
+        "totalItems": sum(len(category.items) for category in categories),
         "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
     
