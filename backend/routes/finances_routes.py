@@ -40,8 +40,8 @@ def recalculate_summaries():
         db.session.add(ExpenseByCategory(category=cat_name, amount=total_amount))
     
     # Get revenue by category
-    revenues = (
-        # Select category name and sum all revenues in that category
+    revenue = (
+        # Select category name and sum all revenue in that category
         # Join with transaction table, transaction category_id matches category id
         # Only include transactions where is_income is true
         # Group the results by category name
@@ -54,7 +54,7 @@ def recalculate_summaries():
     
     # Clear old revenue totals and insert new
     RevenueByCategory.query.delete()
-    for cat_name, total_amount in revenues:
+    for cat_name, total_amount in revenue:
         db.session.add(RevenueByCategory(category=cat_name, amount=total_amount))
     
     db.session.commit()
@@ -78,7 +78,7 @@ def get_expenses_by_category():
     })
 
 @finances_bp.route('/finances/revenue-by-category', methods=['GET'])
-def get_revenues_by_category():
+def get_revenue_by_category():
     revenues = RevenueByCategory.query.all()
     return jsonify({
         "revenue": [revenue.to_dict() for revenue in revenues],
