@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import MenuEditModal from './modals/MenuEditModal'
+import DeleteModal from './modals/DeleteModal'
 
 const MenuItem = ({ items, category }) => {
   return (
@@ -28,13 +29,7 @@ const MenuItem = ({ items, category }) => {
                         <div className="text-lg font-semibold">${item.price}</div>
                         <div className="flex gap-2">
                             <MenuEditModal item={item} itemCategory={category}/>
-                            <Button 
-                            size="sm"
-                            variant="outline"
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive 
-                            hover:bg-destructive/10 shadow-none">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <DeleteModal title="Menu Item" />
                         </div>
                     </div>
                 </CardHeader>

@@ -2,9 +2,9 @@ import React from 'react'
 import { Card, CardHeader, CardDescription, CardContent, CardTitle } from '@/components/ui/card'
 import { Table, TableCell, TableHeader, TableRow, TableHead, TableBody} from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import FinancesEditModal from '@/components/modals/FinancesEditModal'
+import DeleteModal from './modals/DeleteModal'
 
 const RecentTransactions = ({transactions}) => {
     const [showAll, setShowAll] = useState(false)
@@ -41,10 +41,7 @@ const RecentTransactions = ({transactions}) => {
                                 {transaction.manualEntry ? (
                                 <div className="flex justify-center gap-2">
                                     <FinancesEditModal transaction={transaction}/>
-                                    <Button size="sm" variant="outline" 
-									className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shadow-none">
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                    <DeleteModal title="Transaction"/>
                                 </div>
                                 ) : (
                                 <span className="text-gray-300 text-sm">-</span>

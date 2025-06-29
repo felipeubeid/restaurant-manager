@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import InventoryEditModal from './modals/InventoryEditModal'
+import DeleteModal from './modals/DeleteModal'
 
 const InventoryItem = ({item}) => {
   return (
@@ -21,9 +22,7 @@ const InventoryItem = ({item}) => {
         <TableCell className="text-center">
             <div className="flex justify-center gap-2">
                 <InventoryEditModal item={item} />
-                <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shadow-none">
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                <DeleteModal title="Inventory Item" />
             </div>
       </TableCell>
     </TableRow>

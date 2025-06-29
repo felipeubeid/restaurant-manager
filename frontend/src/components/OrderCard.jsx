@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Clock, Trash2 } from 'lucide-react'
 import OrdersEditModal from './modals/OrdersEditModal'
-
+import DeleteModal from './modals/DeleteModal'
 
 const OrderCard = ({order}) => {
   return (
@@ -47,10 +47,7 @@ const OrderCard = ({order}) => {
                     <div className="font-semibold">Total: ${order.total}</div>
                     <div className="flex gap-2">
                         <OrdersEditModal order={order} />
-                        <Button size="sm" variant="outline" 
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shadow-none">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <DeleteModal title="Order"/>
                     </div>
                 </div>
             </div>
