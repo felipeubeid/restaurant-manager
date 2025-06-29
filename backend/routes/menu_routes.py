@@ -29,9 +29,18 @@ def get_menu_categories():
         "totalItems": sum(len(category.items) for category in categories),
         "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
+
+@menu_bp.route('/menu/categories', methods=['GET'])
+def get_menu_categories_names():
+    menu_categories = MenuCategory.query.all()
+    return jsonify({
+        "categories": [c.category for c in menu_categories],
+        "lastUpdated": datetime.now(timezone.utc).isoformat()
+    })
+    
     
 @menu_bp.route('/menu', methods=['POST'])
-def add_menu_category():
+def add_menu_item():
     data = request.get_json()
     
     required_fields = ["name", "cost", "price", "available", "category_id"]
@@ -81,27 +90,27 @@ def update_menu_item(item_id):
     
     # Check for valid fields in the request
     if "name" in data:
-        if not isinstance(data["name"], str) or not data["name"].strip():
+        if not is_valid_name(data["strip"]):
             return jsonify({"error": "Invalid name"}), 400
         item.name = data["name"].strip()
 
     if "description" in data:
-        if not isinstance(data["description"], str):
+        if not is_valid_description(data["description"]):
             return jsonify({"error": "Invalid description"}), 400
         item.description = data["description"].strip()
 
     if "cost" in data:
-        if not isinstance(data["cost"], (int, float)) or data["cost"] < 0:
+        if not is_valid_cost(data["cost"]):
             return jsonify({"error": "Invalid cost"}), 400
         item.cost = data["cost"]
 
     if "price" in data:
-        if not isinstance(data["price"], (int, float)) or data["price"] < 0:
+        if not is_valid_price(data["price"]):
             return jsonify({"error": "Invalid price"}), 400
         item.price = data["price"]
 
     if "available" in data:
-        if not isinstance(data["available"], bool):
+        if not is_valid_available(data["available"]):
             return jsonify({"error": "Invalid availability flag"}), 400
         item.available = data["available"]
 
