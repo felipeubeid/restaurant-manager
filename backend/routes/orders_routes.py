@@ -2,6 +2,7 @@ from models.orders_models import Order, OrderItem
 from flask import Blueprint, jsonify, request
 from db import db
 from datetime import datetime, timezone
+from models.finances_models import Transaction
 
 orders_bp = Blueprint('orders', __name__)  # Blueprint for order management routes
 
@@ -138,6 +139,17 @@ def create_order():
     try:
         db.session.add(new_order)
         db.session.commit()
+        # Record in finances
+        transaction = Transaction(
+            date=datetime.now(timezone.utc).date(),
+            amount=total,
+            description=f"Order #{new_order.order_number}",
+            category_id=6,  # Sale
+            is_income=True,
+            manual_entry=False
+        )
+        db.session.add(transaction)
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -151,6 +163,7 @@ def update_order(order_id):
         return jsonify({"error": "Order not found"}), 404
     
     data = request.get_json()
+    total_changed = False
     
     if "isTakeout" in data:
         if not is_valid_is_takeout(data["isTakeout"]):
@@ -176,6 +189,7 @@ def update_order(order_id):
         if not is_valid_items(data["items"]):
             return jsonify({"error": "Invalid items"}), 400
         update_order_items(order, data["items"])
+        total_changed = True
     
     if "orderNumber" in data:
         if not is_valid_order_number(data["orderNumber"]):
@@ -188,6 +202,32 @@ def update_order(order_id):
 
     try:
         db.session.commit()
+        transaction = Transaction.query.filter_by(
+            description=f"Order #{order.order_number}", 
+            manual_entry=False, category_id=6).first()
+        
+        if not order.completed:
+            # Delete transaction if exists and order not completed
+            if transaction:
+                db.session.delete(transaction)
+                db.session.commit()
+        else:
+            if total_changed:
+                if transaction:
+                    # Update existing transaction
+                    transaction.amount = order.total
+                    transaction.date = datetime.now(timezone.utc).date()
+                else:
+                    transaction = Transaction(
+                        date=datetime.now(timezone.utc).date(),
+                        amount=order.total,
+                        description=f"Order #{order.order_number}",
+                        category_id=6,  # Sale
+                        is_income=True,
+                        manual_entry=False
+                    )
+                    db.session.add(transaction)
+                db.session.commit()
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -201,6 +241,11 @@ def delete_order(order_id):
         return jsonify({"error": "Order not found"}), 404
     
     try:
+        transaction = Transaction.query.filter_by(
+            description=f"Order #{order.order_number}", 
+            manual_entry=False, category_id=6).first()
+        if transaction:
+            db.session.delete(transaction)
         db.session.delete(order)
         db.session.commit()
     except Exception as e:

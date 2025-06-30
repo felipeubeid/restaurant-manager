@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from models.inventory_models import InventoryItem
 from db import db
 from datetime import datetime, timezone
+from models.finances_models import Transaction
 
 inventory_bp = Blueprint('inventory', __name__) # Blueprint for inventory management routes
 
@@ -66,6 +67,17 @@ def add_inventory_item():
     try:
         db.session.add(new_item)
         db.session.commit()
+        # Record in finances
+        transaction = Transaction(
+            date=datetime.now(timezone.utc).date(),
+            amount=total_cost,
+            description=f"{new_item.name}",
+            category_id=1,  # Inventory
+            is_income=False,
+            manual_entry=False
+        )
+        db.session.add(transaction)
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -80,6 +92,7 @@ def update_inventory_item(item_id):
         return jsonify({"error": "Item not found"}), 404
 
     data = request.get_json()
+    cost_changed = False
     
     if "name" in data:
         if not is_valid_name(data["name"]):
@@ -90,6 +103,7 @@ def update_inventory_item(item_id):
         if not is_valid_quantity(data["quantity"]):
             return jsonify({"error": "Quantity must be a non-negative number"}), 400
         item.quantity = data["quantity"]
+        cost_changed = True
 
     if "unit" in data:
         if not is_valid_unit(data["unit"]):
@@ -100,6 +114,7 @@ def update_inventory_item(item_id):
         if not is_valid_cost(data["costPerUnit"]):
             return jsonify({"error": "costPerUnit must be a non-negative number"}), 400
         item.cost_per_unit = data["costPerUnit"]
+        cost_changed = True
 
     if "minQuantity" in data:
         if not is_valid_quantity(data["minQuantity"]):
@@ -111,8 +126,26 @@ def update_inventory_item(item_id):
     item.in_stock = item.quantity >= item.min_quantity
 
     try:
-        db.session.add(item)
         db.session.commit()
+        if cost_changed:
+            transaction = Transaction.query.filter_by(
+                description=f"{item.name}", 
+                manual_entry=False, category_id=1).first()
+            if transaction:
+                # Update existing transaction
+                transaction.amount = item.total_cost
+                transaction.date = datetime.now(timezone.utc).date()
+            else:
+                transaction = Transaction(
+                    date=datetime.now(timezone.utc).date(),
+                    amount=item.total_cost,
+                    description=f"{item.name}",
+                    category_id=1,  # Inventory
+                    is_income=False,
+                    manual_entry=False
+                )
+                db.session.add(transaction)
+            db.session.commit()
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -126,6 +159,11 @@ def delete_inventory_item(item_id):
         return jsonify({"error": "Item not found"}), 404
 
     try:
+        transaction = Transaction.query.filter_by(
+                description=f"{item.name}", 
+                manual_entry=False, category_id=1).first()
+        if transaction:
+            db.session.delete(transaction)
         db.session.delete(item)
         db.session.commit()
     except Exception as e:

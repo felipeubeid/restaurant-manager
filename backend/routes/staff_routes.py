@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from models.staff_models import StaffMember, ShiftDay
 from db import db
 from datetime import datetime, timezone
+from models.finances_models import Transaction
 
 staff_bp = Blueprint('staff', __name__)  # Blueprint for staff management routes
 
@@ -138,6 +139,17 @@ def add_staff_member():
     try:
         db.session.add(new_member)
         db.session.commit()
+        # Record in finances
+        transaction = Transaction(
+            date=datetime.now(timezone.utc).date(),
+            amount=earnings,
+            description=f"{new_member.name} Payroll",
+            category_id=2,  # Payroll
+            is_income=False,
+            manual_entry=False
+        )
+        db.session.add(transaction)
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -151,6 +163,7 @@ def update_staff_member(staff_id):
         return jsonify({"error": "Staff member not found"}), 404
     
     data = request.get_json()
+    earnings_changed = False
     
     if "name" in data:
         if not is_valid_name(data["name"]):
@@ -171,6 +184,7 @@ def update_staff_member(staff_id):
         if not is_valid_wage(data["wage"]):
             return jsonify({"error": "Wage must be a non-negative number"}), 400
         staff_member.wage = data["wage"]
+        earnings_changed = True
 
     shift_start = data.get("shift_start", staff_member.shift_start)
     shift_end = data.get("shift_end", staff_member.shift_end)
@@ -201,9 +215,33 @@ def update_staff_member(staff_id):
     days_list = [day.day for day in staff_member.days]
     staff_member.schedule = format_schedule(days_list, staff_member.shift_start, staff_member.shift_end)
     staff_member.hours = calculate_hours(staff_member.shift_start, staff_member.shift_end)
-    staff_member.earnings = round(staff_member.wage * staff_member.hours, 2)
+    
+    new_earnings = round(staff_member.wage * staff_member.hours, 2)
+    if new_earnings != staff_member.earnings:
+        earnings_changed = True
+
+    staff_member.earnings = new_earnings
     
     try:
+        db.session.commit()
+        if earnings_changed:
+            transaction = Transaction.query.filter_by(
+                description=f"{staff_member.name} Payroll",
+                manual_entry=False, category_id=2).first()
+            if transaction:
+                # Update existing transaction
+                transaction.amount = staff_member.earnings
+                transaction.date = datetime.now(timezone.utc).date()
+            else:
+                transaction = Transaction(
+                    date=datetime.now(timezone.utc).date(),
+                    amount=staff_member.earnings,
+                    description=f"{staff_member.name} Payroll",
+                    category_id=2,  # Payroll
+                    is_income=False,
+                    manual_entry=False
+                )
+                db.session.add(transaction)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -218,6 +256,11 @@ def delete_staff_member(staff_id):
         return jsonify({"error": "Staff member not found"}), 404
     
     try:
+        transaction = Transaction.query.filter_by(
+            description=f"{staff_member.name} Payroll",
+            manual_entry=False, category_id=2).first()
+        if transaction:
+            db.session.delete(transaction)
         db.session.delete(staff_member)
         db.session.commit()
     except Exception as e:
