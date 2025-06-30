@@ -1,5 +1,5 @@
 from models.menu_models import MenuCategory
-from models.finances_models import TransactionCategory
+from models.finances_models import TransactionCategory, Transaction
 from db import db
 
 def seed_menu_categories():

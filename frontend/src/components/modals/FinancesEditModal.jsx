@@ -5,40 +5,87 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Edit } from 'lucide-react'
+import { Edit, Loader2 } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { toast } from 'react-toastify'
 
-const FinancesEditModal = ({transaction}) => {
+const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
   const [type, setType] = useState(transaction.income ? "income" : "expense")
-  const [category, setCategory] = useState(transaction.category || "")
+  const [category, setCategory] = useState(transaction?.category?.id ? String(transaction.category.id) : "")
   const [amount, setAmount] = useState(transaction.amount?.toString() || "")
   const [date, setDate] = useState(transaction.date || new Date().toISOString().slice(0, 10))
   const [description, setDescription] = useState(transaction.description || "")
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   
-  const categories = {
-    income: ["Sale", "Other"],
-    expense: ["Inventory", "Payroll", "Utilities", "Maintenance", "Other"],
-  }
+  const categories = categoriesList || { income: [], expense: [] }
 
   const handleTypeChange = (selectedType) => {
+    setLoading(true)
     if (type !== selectedType) {
       setType(selectedType)
       setCategory("") // reset category when type changes
     }
   }
+
+  const handleEdit = async () => {
+    const amountVal = parseFloat(amount)
+    // Validate
+    if (!type || !category || !amount || isNaN(amountVal) || amountVal <= 0) {
+      toast.error("Please fill all required fields with valid data.")
+      return
+    }
   
+    const selectedCategory = (categories[type] || []).find(
+      (cat) => String(cat.id) === String(category)
+    )
+    if (!selectedCategory) {
+      toast.error("Please select a valid category.")
+      return
+    }
+  
+    const payload = {
+      date,
+      amount: amountVal,
+      description: description || "",
+      category_id: selectedCategory.id,
+      is_income: type === "income",
+      manual_entry: true,
+    }
+  
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/finances/transactions/${transaction.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+  
+      if (!res.ok) throw new Error("Failed to edit transaction")
+      await res.json()
+      toast.success("Transaction edited!")
+      setOpen(false)
+      if (onEdited) onEdited()
+    } catch (err) {
+      console.error(err)
+      toast.error("Error editing transaction")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <Dialog onOpenChange={(isOpen) => {
-      if (isOpen) {
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen)
+      if (!isOpen) {
         setType(transaction?.income ? "income" : "expense")
-        setCategory(transaction?.category || "")
+        setCategory(transaction?.category?.id ? String(transaction.category.id) : "")
         setAmount(transaction?.amount?.toString() || "")
         setDate(transaction?.date || new Date().toISOString().slice(0, 10))
         setDescription(transaction?.description || "")
       }
     }}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
+        <Button onClick={() => setOpen(true)} size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
       	  <Edit className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -107,7 +154,7 @@ const FinancesEditModal = ({transaction}) => {
               </SelectTrigger>
               <SelectContent>
                 {(categories[type] || []).map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -123,7 +170,9 @@ const FinancesEditModal = ({transaction}) => {
         </div>
 
         <DialogFooter>
-            <Button type="submit">Save</Button>
+          <Button onClick={handleEdit} disabled={loading}>
+            {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Save'}
+          </Button>
         </DialogFooter>
 
       </DialogContent>

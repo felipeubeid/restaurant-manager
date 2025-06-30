@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { toast } from 'react-toastify'
 
-const FinancesAddModal = () => {
+const FinancesAddModal = ({categoriesList, onAdded}) => {
   const [type, setType] = useState("")
   const [category, setCategory] = useState("")
   const [date, setDate] = useState(() => {
@@ -16,16 +17,63 @@ const FinancesAddModal = () => {
     const today = new Date()
     return today.toISOString().slice(0, 10)
   })
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("")
+  const [description, setDescription] = useState("")
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const categories = categoriesList || { income: [], expense: [] }
+
+  const handleAdd = async () => {
+    setLoading(true)
+    const amountVal = parseFloat(amount)
+    // Validate
+    if (!type || !category || !amount || isNaN(amountVal) || amountVal < 0) {
+      toast.error("Please fill in type, category, and a valid amount.")
+      return 
+    }
   
-  const categories = {
-    income: ["Sale", "Other"],
-    expense: ["Inventory", "Payroll", "Utilities", "Maintenance", "Other"],
+    const selectedCategory = (categories[type] || []).find(
+      (cat) => String(cat.id) === String(category))
+  
+    if (!selectedCategory) {
+      toast.error("Please select a valid category.")
+      return
+    }
+  
+    const payload = {
+      date,
+      amount: amountVal,
+      description: description || "",
+      category_id: selectedCategory.id,
+      is_income: type === "income",  
+      manual_entry: true,
+    }
+  
+    try {
+      const res = await fetch("http://127.0.0.1:5000/finances/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+  
+      if (!res.ok) throw new Error("Failed to add transaction")
+      const data = await res.json()
+      console.log("Added transaction:", data)
+      if (onAdded) onAdded()
+      setOpen(false)
+      toast.success("Transaction added!")
+    } catch (err) {
+      console.error(err)
+      toast.error("Error adding transaction")
+    } finally {
+      setLoading(false)
+    }
   }
   
   return (
-    <Dialog onOpenChange={(isOpen) => {
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen)
       if (!isOpen) {
         setType("")
         setCategory("")
@@ -34,7 +82,7 @@ const FinancesAddModal = () => {
         setDescription("")
       }}}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
+        <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
           <Plus className="h-4 w-4" /> Add Transaction
         </Button>
       </DialogTrigger>
@@ -103,7 +151,7 @@ const FinancesAddModal = () => {
               </SelectTrigger>
               <SelectContent>
                 {(categories[type] || []).map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -122,8 +170,9 @@ const FinancesAddModal = () => {
         </div>
 
         <DialogFooter>
-          <Button type="submit">
-            <Plus className="h-4 w-4" />Add
+          <Button onClick={handleAdd} disabled={loading}>
+            <Plus className="h-4 w-4" />
+            {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Add'}
           </Button>
         </DialogFooter>
 

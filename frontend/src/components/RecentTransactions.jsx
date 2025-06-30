@@ -6,9 +6,17 @@ import { useState } from 'react'
 import FinancesEditModal from '@/components/modals/FinancesEditModal'
 import DeleteModal from './modals/DeleteModal'
 
-const RecentTransactions = ({transactions}) => {
+const RecentTransactions = ({transactions, categories, refreshData}) => {
     const [showAll, setShowAll] = useState(false)
   	const visibleTransactions = showAll ? transactions : transactions.slice(0, 6)
+
+    const deleteTransaction = async (id) => {
+      const res = await fetch(`http://127.0.0.1:5000/finances/transactions/${id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Delete failed')
+    }
+
   	return (
     <Card className="shadow-none">
         <CardHeader>
@@ -31,17 +39,18 @@ const RecentTransactions = ({transactions}) => {
                         <TableRow key={index} className="h-12 shadow-none hover:bg-muted/30 transition-all border-none">
                             <TableCell>{transaction.date}</TableCell>
                             <TableCell className="font-medium">{transaction.description}</TableCell>
-                            <TableCell className="capitalize">{transaction.category}</TableCell>
-							<TableCell className={transaction.income ? 
+                            <TableCell className="capitalize">{transaction.category.name}</TableCell>
+							<TableCell className={transaction.isIncome ? 
 							"text-green-600 break-words font-medium" :
 							"text-red-600 break-words font-medium"}>
-								{transaction.income ? '+' : '-'}${transaction.amount.toFixed(2)}
+								{transaction.isIncome ? '+' : '-'}${transaction.amount.toFixed(2)}
 							</TableCell>
                             <TableCell className="text-center">
                                 {transaction.manualEntry ? (
                                 <div className="flex justify-center gap-2">
-                                    <FinancesEditModal transaction={transaction}/>
-                                    <DeleteModal title="Transaction"/>
+                                    <FinancesEditModal categoriesList={categories} onEdited={refreshData} transaction={transaction}/>
+                                    <DeleteModal title="Transaction" onDeleted={refreshData} 
+                                    deleteId={transaction.id} deleteFunction={deleteTransaction}/>
                                 </div>
                                 ) : (
                                 <span className="text-gray-300 text-sm">-</span>

@@ -58,10 +58,14 @@ def recalculate_summaries():
         db.session.add(RevenueByCategory(category=cat_name, amount=total_amount))
     
     db.session.commit()
+
+def reorder_categories(items):
+    # Sort so that "Other" comes last
+    return sorted(items, key=lambda x: (x.category in ("Other", "Others"), x.category))
     
 @finances_bp.route('/finances/transactions', methods=['GET'])
 def get_transactions():
-    transactions = Transaction.query.all()
+    transactions = Transaction.query.order_by(Transaction.id.desc()).all()
     return jsonify({
         "transactions": [transaction.to_dict() for transaction in transactions],
         "totalTransactions": len(transactions),
@@ -71,8 +75,9 @@ def get_transactions():
 @finances_bp.route('/finances/expense-by-category', methods=['GET'])
 def get_expenses_by_category():
     expenses = ExpenseByCategory.query.all()
+    expenses_sorted = reorder_categories(expenses)
     return jsonify({
-        "expenses": [expense.to_dict() for expense in expenses],
+        "expenses": [expense.to_dict() for expense in expenses_sorted],
         "totalCategories": len(expenses),
         "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
@@ -80,19 +85,55 @@ def get_expenses_by_category():
 @finances_bp.route('/finances/revenue-by-category', methods=['GET'])
 def get_revenue_by_category():
     revenues = RevenueByCategory.query.all()
+    revenues_sorted = reorder_categories(revenues)
     return jsonify({
-        "revenue": [revenue.to_dict() for revenue in revenues],
+        "revenue": [revenue.to_dict() for revenue in revenues_sorted],
         "totalCategories": len(revenues),
         "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
+
+from datetime import datetime, timedelta
+
+@finances_bp.route('/finances/summary', methods=['GET'])
+def get_finances_summary():
+    today = datetime.now(timezone.utc).date()
+    start_of_week = today - timedelta(days=today.weekday()) # Start of the week (Monday)
+    end_of_week = start_of_week + timedelta(days=6) # End of week (Sunday)
+
+    # Convert to string
+    start_str = start_of_week.isoformat()
+    end_str = end_of_week.isoformat()
+
+    # Filter transactions by date between start and end of week
+    total_revenue = db.session.query(db.func.sum(Transaction.amount)).filter(
+        Transaction.is_income == True).filter(
+        Transaction.date >= start_str).filter(
+        Transaction.date <= end_str).scalar() or 0.0
+
+    total_expenses = db.session.query(db.func.sum(Transaction.amount)).filter(
+        Transaction.is_income == False).filter(
+        Transaction.date >= start_str).filter(
+        Transaction.date <= end_str).scalar() or 0.0
+
+    net_profit = total_revenue - total_expenses
+    profit_margin = net_profit / total_revenue if total_revenue > 0 else 0.0
+
+    return jsonify({
+        "totalRevenue": total_revenue,
+        "totalExpenses": total_expenses,
+        "netProfit": net_profit,
+        "profitMargin": profit_margin,
+        "lastUpdated": datetime.now(timezone.utc).isoformat()
+    })
+
 
 @finances_bp.route('/finances/categories', methods=['GET'])
 def get_transaction_categories():
     income_categories = TransactionCategory.query.filter_by(is_income=True).all()
     expense_categories = TransactionCategory.query.filter_by(is_income=False).all()
     return jsonify({
-        "incomeCategories": [c.name for c in income_categories],
-        "expenseCategories": [c.name for c in expense_categories],
+        "incomeCategories": [{"id": c.id, "name": c.name} for c in income_categories],
+        "expenseCategories": [{"id": c.id, "name": c.name} for c in expense_categories],
         "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
     

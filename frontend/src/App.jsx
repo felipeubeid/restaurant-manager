@@ -8,6 +8,8 @@ import Menu from './pages/Menu'
 import Staff from './pages/Staff'
 import Inventory from './pages/Inventory'
 import NotFound from './pages/NotFound'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css' 
 
 const App = () => {
   // Create the router with routes
@@ -24,7 +26,19 @@ const App = () => {
       </Route>
     )
   )
-  return <RouterProvider router={router}/>
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ToastContainer 
+        position="top-right" 
+        autoClose={2000} 
+        hideProgressBar={true} 
+        newestOnTop 
+        closeOnClick 
+        pauseOnHover 
+      />
+    </>
+  )
 }
 
 export default App
