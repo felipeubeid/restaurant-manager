@@ -85,7 +85,7 @@ function setFinancesOrdersCards(financesData, ordersData) {
       subtitle: "from yesterday",
       symbol: '$',
       icon: ChartLine,
-      textColor: financesData.revenuePercentChange >= 0 ? "text-green-600" : "text-red-600",
+      textColor: "text-green-600"
     },
     {
       title: "Expenses Today",
@@ -94,7 +94,7 @@ function setFinancesOrdersCards(financesData, ordersData) {
       subtitle: "from yesterday",
       symbol: '$',
       icon: Wallet,
-      textColor: financesData.expensesPercentChange >= 0 ? "text-green-600" : "text-red-600",
+      textColor: "text-red-600"
     },
     {
       title: "Orders Today",

@@ -105,7 +105,7 @@ const InventoryAddModal = ({onAdded}) => {
               <Input
                 id="unit"
                 className="shadow-none"
-                placeholder="Units"
+                placeholder="Unit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
               />
