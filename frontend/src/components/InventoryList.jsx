@@ -2,7 +2,7 @@ import React from 'react'
 import { Table, TableBody, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import InventoryItem from './InventoryItem'
 
-const InventoryList = ({inventory}) => {
+const InventoryList = ({inventory, fetchInventory}) => {
   return (
 	<div className="rounded-xl border bg-white shadow-none px-4 py-1">
 		<Table>
@@ -19,7 +19,7 @@ const InventoryList = ({inventory}) => {
 			</TableHeader>
 			<TableBody>
 				{inventory.map((item) => (
-					<InventoryItem key={item.id} item={item} />
+					<InventoryItem key={item.id} item={item} fetchInventory={fetchInventory}/>
 				))}
 			</TableBody>
 		</Table>

@@ -31,7 +31,7 @@ def get_inventory():
 def add_inventory_item():
     data = request.get_json()
 
-    required_fields = ["name", "quantity", "unit", "costPerUnit", "minQuantity"]
+    required_fields = ["name", "quantity", "unit", "totalCost", "minQuantity"]
     missing = [field for field in required_fields if field not in data]
     if missing:
         return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
@@ -42,16 +42,19 @@ def add_inventory_item():
         return jsonify({"error": "Quantity must be a non-negative number"}), 400
     if not is_valid_unit(data["unit"]):
         return jsonify({"error": "Invalid unit"}), 400
-    if not is_valid_cost(data["costPerUnit"]):
-        return jsonify({"error": "costPerUnit must be a non-negative number"}), 400
+    if not is_valid_cost(data["totalCost"]):
+        return jsonify({"error": "totalCost must be a non-negative number"}), 400
     if not is_valid_quantity(data["minQuantity"]):
         return jsonify({"error": "minQuantity must be a non-negative number"}), 400
 
     quantity = data["quantity"]
-    cost_per_unit = data["costPerUnit"]
+    total_cost = data["totalCost"]
     min_quantity = data["minQuantity"]
 
-    total_cost = round(quantity * cost_per_unit, 2)
+    if quantity == 0:
+        return jsonify({"error": "Quantity cannot be zero when calculating cost per unit"}), 400
+
+    cost_per_unit = round(total_cost / quantity, 2)
     in_stock = quantity >= min_quantity
 
     new_item = InventoryItem(
@@ -110,10 +113,15 @@ def update_inventory_item(item_id):
             return jsonify({"error": "Invalid unit"}), 400
         item.unit = data["unit"].strip()
 
-    if "costPerUnit" in data:
-        if not is_valid_cost(data["costPerUnit"]):
-            return jsonify({"error": "costPerUnit must be a non-negative number"}), 400
-        item.cost_per_unit = data["costPerUnit"]
+    if "totalCost" in data:
+        if not is_valid_cost(data["totalCost"]):
+            return jsonify({"error": "totalCost must be a non-negative number"}), 400
+        item.total_cost = data["totalCost"]
+        # Recalculate
+        if item.quantity == 0:
+            item.cost_per_unit = 0
+        else:
+            item.cost_per_unit = round(item.total_cost / item.quantity, 2)
         cost_changed = True
 
     if "minQuantity" in data:
@@ -121,8 +129,6 @@ def update_inventory_item(item_id):
             return jsonify({"error": "minQuantity must be a non-negative number"}), 400
         item.min_quantity = data["minQuantity"]
 
-    # Recalculate
-    item.total_cost = round(item.quantity * item.cost_per_unit, 2)
     item.in_stock = item.quantity >= item.min_quantity
 
     try:

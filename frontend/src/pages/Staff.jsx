@@ -24,6 +24,7 @@ const Staff = () => {
   useEffect(() => {
     fetchStaff()
   }, [])
+
   return (
     <div className="space-y-6 px-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 gap-3">
@@ -43,7 +44,7 @@ const Staff = () => {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {staff.map((staffMember) => (
                 staff.length > 0 && (<StaffMember key={staffMember.id} staffMember={staffMember} 
-                  fetchStaffMember={fetchStaff} />)
+                  fetchStaff={fetchStaff} />)
               ))}
             </div>
           </div>

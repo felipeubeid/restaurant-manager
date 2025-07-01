@@ -3,17 +3,63 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
-const InventoryAddModel = () => {
+const InventoryAddModal = ({onAdded}) => {
   const [name, setName] = useState("")
   const [quantity, setQuantity] = useState("")
   const [minQuantity, setMinQuantity] = useState("")
   const [unit, setUnit] = useState("")
   const [totalCost, setTotalCost] = useState("")
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleAddItem = async () => {
+    setLoading(true)
+    const quantityVal = parseFloat(quantity) || 0
+    const minQuantityVal = parseFloat(minQuantity) || 0
+    const totalCostVal = parseFloat(totalCost) || 0
+    // Validate
+    if (!name || !unit || isNaN(quantityVal) || quantityVal <= 0 
+    || isNaN(minQuantityVal) || minQuantityVal < 0 
+    || isNaN(totalCostVal) || totalCostVal < 0) {
+      toast.error("Please fill in name, units, and valid quantities and cost.")
+      setLoading(false)
+      return 
+    }
+  
+    const payload = {
+      name,
+      quantity: quantityVal,
+      minQuantity: minQuantityVal,
+      unit,
+      totalCost: totalCostVal
+    }
+  
+    try {
+      const res = await axios.post("http://127.0.0.1:5000/inventory", payload)
+      if (onAdded) onAdded()
+
+      setName("")
+      setQuantity("")
+      setMinQuantity("")
+      setUnit("")
+      setTotalCost("")
+      
+      setOpen(false)
+      toast.success("Inventory Item added!")
+    } catch (err) {
+      toast.error("Error adding Inventory Item")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <Dialog onOpenChange={(isOpen) => {
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen)
       if (!isOpen) {
         setName("")
         setQuantity("")
@@ -22,7 +68,7 @@ const InventoryAddModel = () => {
         setTotalCost("")
       }}}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
+        <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
           <Plus className="h-4 w-4" /> Add Item
         </Button>
       </DialogTrigger>
@@ -99,8 +145,9 @@ const InventoryAddModel = () => {
         </div>
 
         <DialogFooter>
-          <Button type="submit">
-            <Plus className="h-4 w-4" />Add
+          <Button onClick={handleAddItem} disabled={loading}>
+            <Plus className="h-4 w-4" />
+            {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Add'}
           </Button>
         </DialogFooter>
 
@@ -109,4 +156,4 @@ const InventoryAddModel = () => {
   )
 }
 
-export default InventoryAddModel
+export default InventoryAddModal

@@ -3,17 +3,56 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
-import { Edit } from 'lucide-react'
+import { Edit, Loader2 } from 'lucide-react'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
-const InventoryEditModel = ({item}) => {
+const InventoryEditModel = ({item, onEdited}) => {
   const [name, setName] = useState(item?.name || "")
   const [quantity, setQuantity] = useState(item?.quantity?.toString() || "")
   const [minQuantity, setMinQuantity] = useState(item?.minQuantity?.toString() || "")
   const [unit, setUnit] = useState(item?.unit || "")
   const [totalCost, setTotalCost] = useState(item?.totalCost?.toString() || "")
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleEditItem = async () => {
+    setLoading(true)
+    const quantityVal = parseFloat(quantity) || 0
+    const minQuantityVal = parseFloat(minQuantity) || 0
+    const totalCostVal = parseFloat(totalCost) || 0
+    // Validate
+    if (!name || !unit || isNaN(quantityVal) || quantityVal <= 0 
+    || isNaN(minQuantityVal) || minQuantityVal < 0 
+    || isNaN(totalCostVal) || totalCostVal < 0) {
+      toast.error("Please fill in name, units, and valid quantities and cost.")
+      setLoading(false)
+      return 
+    }
+  
+    const payload = {
+      name,
+      quantity: quantityVal,
+      minQuantity: minQuantityVal,
+      unit,
+      totalCost: totalCostVal
+    }
+  
+    try {
+      const res = await axios.patch(`http://127.0.0.1:5000/inventory/${item.id}`, payload)
+      toast.success("Inventory Item edited!")
+      setOpen(false)
+      if (onEdited) onEdited()
+    } catch (err) {
+      toast.error("Error editing Inventory Item")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <Dialog onOpenChange={(isOpen) => {
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen)
       if (!isOpen) {
         setName(item?.name || "")
         setQuantity(item?.quantity?.toString() || "")
@@ -22,7 +61,7 @@ const InventoryEditModel = ({item}) => {
         setTotalCost(item?.totalCost?.toString() || "")
       }}}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
+        <Button onClick={() => setOpen(true)} size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
           <Edit className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -95,11 +134,12 @@ const InventoryEditModel = ({item}) => {
                   onChange={(e) => setTotalCost(e.target.value)}/>
               </div>
           </div>
-
         </div>
 
         <DialogFooter>
-          <Button type="submit">Save</Button>
+          <Button onClick={handleEditItem} disabled={loading}>
+            {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Save'}
+          </Button>
         </DialogFooter>
 
       </DialogContent>

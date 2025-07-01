@@ -11,7 +11,7 @@ const statusColors = {
     Off: "!bg-red-100 !text-red-600"
   }
 
-const StaffMember = ({staffMember, fetchStaffMember}) => {
+const StaffMember = ({staffMember, fetchStaff}) => {
     const status = staffMember.is_active ? "Active" : "Off"
     const statusClass = statusColors[status] || ""
 
@@ -71,8 +71,8 @@ const StaffMember = ({staffMember, fetchStaffMember}) => {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <StaffEditModal staffMember={staffMember} onEdited={fetchStaffMember} />
-                    <DeleteModal title="Staff Member" onDeleted={fetchStaffMember} 
+                    <StaffEditModal staffMember={staffMember} onEdited={fetchStaff} />
+                    <DeleteModal title="Staff Member" onDeleted={fetchStaff} 
                     deleteId={staffMember.id} deleteFunction={deleteStaffMember}/>
                 </div>
             </CardContent>
