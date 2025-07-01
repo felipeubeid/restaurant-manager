@@ -2,7 +2,7 @@ import React from 'react'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { ArrowUp, ArrowDown} from 'lucide-react'
 
-const StatsCard = ({ title, value, percentage, subtitle, icon: Icon, textColor, symbol }) => {
+const StatsCard = ({ title, value, percentage, subtitle, icon: Icon, textColor, symbol, finance }) => {
   return (
     <Card className="shadow-none flex flex-col items-center text-center">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -12,7 +12,9 @@ const StatsCard = ({ title, value, percentage, subtitle, icon: Icon, textColor, 
             </div>
         </CardHeader>
         <CardContent>
-            <div className={`text-2xl font-bold pb-2 break-words ${textColor}`}>{symbol}{value}</div>
+            <div className={`text-2xl font-bold pb-2 break-words ${textColor}`}>
+                {finance ? `${symbol}${value.toFixed(2)}` : value}
+            </div>
             <p className="text-xs">
                 {percentage >= 0 ? <ArrowUp className="inline h-3 w-3" /> : <ArrowDown className="inline h-3 w-3" />}
                 {percentage >= 0 ? ' +' : ' '}{percentage}% {subtitle}
