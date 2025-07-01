@@ -1,14 +1,23 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Clock, Trash2 } from 'lucide-react'
+import { Clock, Loader2 } from 'lucide-react'
 import OrdersEditModal from './modals/OrdersEditModal'
 import DeleteModal from './modals/DeleteModal'
+import axios from 'axios'
 
-const OrderCard = ({order}) => {
+const OrderCard = ({ order, menuItems, staff, fetchOrders }) => {
+
+    const deleteOrder = async (id) => {
+        try {
+            await axios.delete(`http://127.0.0.1:5000/orders/${id}`)
+        } catch (error) {
+            throw new Error('Delete failed')
+        }
+    }
+
   return (
-    <Card key={order.index} className="shadow-none hover:bg-muted/30 transition-all">
+    <Card className="shadow-none hover:bg-muted/30 transition-all">
         <CardHeader className>
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -46,8 +55,10 @@ const OrderCard = ({order}) => {
                 <div className="border-t pt-3 flex justify-between items-center">
                     <div className="font-semibold">Total: ${order.total}</div>
                     <div className="flex gap-2">
-                        <OrdersEditModal order={order} />
-                        <DeleteModal title="Order"/>
+                        <OrdersEditModal order={order} menuItems={menuItems} 
+                        staff={staff} onEdited={fetchOrders}/>
+                        <DeleteModal title="Order" onDeleted={fetchOrders} 
+                        deleteId={order.id} deleteFunction={deleteOrder}/>
                     </div>
                 </div>
             </div>

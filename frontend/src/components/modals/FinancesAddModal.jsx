@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Loader2 } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { toast } from 'react-toastify'
+import axios from 'axios'
 
 const FinancesAddModal = ({categoriesList, onAdded}) => {
   const [type, setType] = useState("")
@@ -24,7 +25,7 @@ const FinancesAddModal = ({categoriesList, onAdded}) => {
 
   const categories = categoriesList || { income: [], expense: [] }
 
-  const handleAdd = async () => {
+  const handleAddTransaction = async () => {
     setLoading(true)
     const amountVal = parseFloat(amount)
     // Validate
@@ -38,6 +39,7 @@ const FinancesAddModal = ({categoriesList, onAdded}) => {
   
     if (!selectedCategory) {
       toast.error("Please select a valid category.")
+      setLoading(false)
       return
     }
   
@@ -51,20 +53,18 @@ const FinancesAddModal = ({categoriesList, onAdded}) => {
     }
   
     try {
-      const res = await fetch("http://127.0.0.1:5000/finances/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-  
-      if (!res.ok) throw new Error("Failed to add transaction")
-      const data = await res.json()
-      console.log("Added transaction:", data)
+      const res = await axios.post("http://127.0.0.1:5000/finances/transactions", payload)
       if (onAdded) onAdded()
+
+      setType("")
+      setCategory("")
+      setAmount("")
+      setDate(new Date().toISOString().slice(0, 10))
+      setDescription("")
+      
       setOpen(false)
       toast.success("Transaction added!")
     } catch (err) {
-      console.error(err)
       toast.error("Error adding transaction")
     } finally {
       setLoading(false)
@@ -170,7 +170,7 @@ const FinancesAddModal = ({categoriesList, onAdded}) => {
         </div>
 
         <DialogFooter>
-          <Button onClick={handleAdd} disabled={loading}>
+          <Button onClick={handleAddTransaction} disabled={loading}>
             <Plus className="h-4 w-4" />
             {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Add'}
           </Button>

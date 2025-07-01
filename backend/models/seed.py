@@ -1,5 +1,5 @@
 from models.menu_models import MenuCategory
-from models.finances_models import TransactionCategory, Transaction
+from models.finances_models import TransactionCategory
 from db import db
 
 def seed_menu_categories():
@@ -23,7 +23,7 @@ def seed_income_categories():
     db.session.commit()
             
 def seed_expense_categories():
-    categories = ["Inventory", "Payroll", "Utilities", "Maintenance", "Others"]
+    categories = ["Inventory", "Payroll", "Utilities", "Production", "Others"]
 
     for category_name in categories:
         exists = TransactionCategory.query.filter_by(name=category_name,is_income=False).first()
@@ -31,3 +31,4 @@ def seed_expense_categories():
             new_cat = TransactionCategory(name=category_name, is_income=False)
             db.session.add(new_cat)
     db.session.commit()
+    

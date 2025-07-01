@@ -146,13 +146,14 @@ def delete_menu_item(item_id):
 # Route to get all available menu items for orders
 @menu_bp.route('/menu/items', methods=['GET'])
 def get_available_menu_items():
-    items = MenuItem.query.filter_by(available=True).all()
+    items = MenuItem.query.all()
     return jsonify([
         {
             "id": item.id,
             "name": item.name,
             "price": item.price,
-            "available": item.available
+            "available": item.available,
+            "cost": item.cost
         }
         for item in items
     ])

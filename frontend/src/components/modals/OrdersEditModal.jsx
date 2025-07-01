@@ -6,34 +6,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Plus, Minus, Edit } from 'lucide-react'
+import { Plus, Minus, Edit, Loader2 } from 'lucide-react'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
-  const staff = [
-  { id: 1, name: "Alice Johnson", role: "Server", status: "Active" },
-  { id: 2, name: "Carlos Ramirez", role: "Cook", status: "Active" },
-  { id: 3, name: "Jenna Lee", role: "Host", status: "Off" },
-  { id: 4, name: "Marcus Smith", role: "Dishwasher", status: "Active" },
-  { id: 5, name: "Emily Brown", role: "Manager", status: "Active" },
-  ];
-
-  const menuData = [
-    { id: 1, name: "Caesar Salad", cost: 2.10, price: 7.50, available: true },
-    { id: 2, name: "Margherita Pizza", cost: 4.25, price: 12.00, available: true },
-    { id: 3, name: "Spaghetti Carbonara", cost: 3.90, price: 13.00, available: true },
-    { id: 4, name: "Bruschetta", cost: 1.20, price: 6.00, available: true },
-    { id: 5, name: "Garlic Bread", cost: 0.90, price: 3.00, available: true },
-  ]
-
-const OrdersEditModal = ({order}) => {
+const OrdersEditModal = ({order, menuItems, staff, onEdited}) => {
   const [type, setType] = useState(order?.isTakeout ? "takeout" : "dineIn")
   const [server, setServer] = useState(order?.server || "")
   const [date, setDate] = useState(order?.date || new Date().toISOString().slice(0, 10))
   const [orderItems, setOrderItems] = useState(order?.items || [])
   const [total, setTotal] = useState(order?.total || 0)
-  const [searchTerm, setSearchTerm] = useState("")
   const [selectedItemId, setSelectedItemId] = useState(null)
   const [orderNumber, setOrderNumber] = useState(order?.orderNumber || "")
   const [completed, setCompleted] = useState(order?.completed || false)
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   // Update total whenever orderItems change
   useEffect(() => {
@@ -44,7 +31,7 @@ const OrdersEditModal = ({order}) => {
   // Handle item selection from the dropdown
   function onSelectItem(val) {
     const id = Number(val) // Convert value to number
-    const item = menuData.find(i => i.id === id) // Find the item by id
+    const item = menuItems.find(i => i.id === id) // Find the item by id
     
     if (!item || !item.available) return // If item is not found or not available, do nothing
 
@@ -69,20 +56,50 @@ const OrdersEditModal = ({order}) => {
           .filter(i => i.quantity > 0)) // Remove item if quantity is 0
     }
 
-    const servers = staff.filter(person => person.status === "Active")
+    const servers = staff.filter(person => person.is_active)
 
-    const filteredMenu = menuData.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    const handleEditOrder = async () => {
+      if (!type || !server || orderItems.length === 0) {
+        toast.error("Please fill out all required fields.")
+        return
+      }
+  
+      const payload = {
+        isTakeout: type === "takeout",
+        server,
+        date,
+        items: orderItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        completed,
+        orderNumber: Number(orderNumber)
+      }
+  
+      setLoading(true)
+      try {
+        await axios.patch(`http://127.0.0.1:5000/orders/${order.id}`, payload)
+        toast.success("Order edited!")
+        setOpen(false)
+        if (onEdited) onEdited()
+      } catch (error) {
+        toast.error("Error editing order")
+      } finally {
+        setLoading(false)
+      }
+    }
 
     return (
-    <Dialog onOpenChange={(isOpen) => {
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen)
       if (!isOpen) {
         setType(order?.isTakeout ? "takeout" : "dineIn")
         setServer(order?.server || "")
         setDate(order?.date || new Date().toISOString().slice(0, 10))
         setOrderItems(order?.items || [])
         setTotal(order?.total || 0)
-        setSearchTerm("")
         setSelectedItemId(null)
         setOrderNumber(order?.orderNumber || "")
         setCompleted(order?.completed || false)
@@ -108,11 +125,11 @@ const OrdersEditModal = ({order}) => {
               setType(value)
               }}>
               <div className="flex items-center space-x-2 ">
-                <RadioGroupItem value="dineIn" id="income" className="shadow-none border-lg"/>
+                <RadioGroupItem value="dineIn" id="dineIn" className="shadow-none border-lg"/>
                 <Label htmlFor="dineIn">Dine In</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="takeout" id="expense" className="shadow-none border-lg"/>
+                <RadioGroupItem value="takeout" id="takeout" className="shadow-none border-lg"/>
                 <Label htmlFor="takeout">Takeout</Label>
               </div>
             </RadioGroup>
@@ -169,7 +186,7 @@ const OrdersEditModal = ({order}) => {
           onValueChange={onSelectItem}>
           <SelectTrigger id="menuSelect" className="col-span-3 shadow-none" />
             <SelectContent className="max-h-48 overflow-y-auto">
-              {menuData.map(item => (
+              {menuItems.map(item => (
                 <SelectItem
                   key={item.id}
                   value={item.id.toString()}
@@ -240,7 +257,9 @@ const OrdersEditModal = ({order}) => {
         </div>
 
         <DialogFooter>
-          <Button type="submit">Save</Button>
+          <Button onClick={handleEditOrder} disabled={loading}>
+            {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Save'}
+          </Button>
         </DialogFooter>
 
       </DialogContent>

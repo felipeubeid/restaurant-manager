@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Loader2 } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { toast } from 'react-toastify'
+import axios from 'axios'
 
 const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
-  const [type, setType] = useState(transaction.income ? "income" : "expense")
+  const [type, setType] = useState(transaction.isIncome ? "income" : "expense")
   const [category, setCategory] = useState(transaction?.category?.id ? String(transaction.category.id) : "")
   const [amount, setAmount] = useState(transaction.amount?.toString() || "")
   const [date, setDate] = useState(transaction.date || new Date().toISOString().slice(0, 10))
@@ -28,7 +29,7 @@ const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
     }
   }
 
-  const handleEdit = async () => {
+  const handleEditTransaction = async () => {
     const amountVal = parseFloat(amount)
     // Validate
     if (!type || !category || !amount || isNaN(amountVal) || amountVal <= 0) {
@@ -41,6 +42,7 @@ const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
     )
     if (!selectedCategory) {
       toast.error("Please select a valid category.")
+      setLoading(false)
       return
     }
   
@@ -54,19 +56,11 @@ const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
     }
   
     try {
-      const res = await fetch(`http://127.0.0.1:5000/finances/transactions/${transaction.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-  
-      if (!res.ok) throw new Error("Failed to edit transaction")
-      await res.json()
+      const res = await axios.patch(`http://127.0.0.1:5000/finances/transactions/${transaction.id}`, payload)
       toast.success("Transaction edited!")
       setOpen(false)
       if (onEdited) onEdited()
     } catch (err) {
-      console.error(err)
       toast.error("Error editing transaction")
     } finally {
       setLoading(false)
@@ -76,8 +70,8 @@ const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       setOpen(isOpen)
-      if (!isOpen) {
-        setType(transaction?.income ? "income" : "expense")
+      if (isOpen) {
+        setType(transaction?.isIncome ? "income" : "expense")
         setCategory(transaction?.category?.id ? String(transaction.category.id) : "")
         setAmount(transaction?.amount?.toString() || "")
         setDate(transaction?.date || new Date().toISOString().slice(0, 10))
@@ -170,7 +164,7 @@ const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
         </div>
 
         <DialogFooter>
-          <Button onClick={handleEdit} disabled={loading}>
+          <Button onClick={handleEditTransaction} disabled={loading}>
             {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Save'}
           </Button>
         </DialogFooter>

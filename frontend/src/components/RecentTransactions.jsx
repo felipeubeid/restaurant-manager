@@ -5,17 +5,19 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import FinancesEditModal from '@/components/modals/FinancesEditModal'
 import DeleteModal from './modals/DeleteModal'
+import axios from 'axios'
 
-const RecentTransactions = ({transactions, categories, refreshData}) => {
+const RecentTransactions = ({transactions, categories, fetchData}) => {
     const [showAll, setShowAll] = useState(false)
   	const visibleTransactions = showAll ? transactions : transactions.slice(0, 6)
 
-    const deleteTransaction = async (id) => {
-      const res = await fetch(`http://127.0.0.1:5000/finances/transactions/${id}`, {
-        method: 'DELETE',
-      })
-      if (!res.ok) throw new Error('Delete failed')
-    }
+      const deleteTransaction = async (id) => {
+        try {
+          await axios.delete(`http://127.0.0.1:5000/finances/transactions/${id}`)
+        } catch (error) {
+          throw new Error('Delete failed')
+        }
+      }
 
   	return (
     <Card className="shadow-none">
@@ -48,8 +50,9 @@ const RecentTransactions = ({transactions, categories, refreshData}) => {
                             <TableCell className="text-center">
                                 {transaction.manualEntry ? (
                                 <div className="flex justify-center gap-2">
-                                    <FinancesEditModal categoriesList={categories} onEdited={refreshData} transaction={transaction}/>
-                                    <DeleteModal title="Transaction" onDeleted={refreshData} 
+                                    <FinancesEditModal categoriesList={categories} onEdited={fetchData} 
+                                    transaction={transaction}/>
+                                    <DeleteModal title="Transaction" onDeleted={fetchData} 
                                     deleteId={transaction.id} deleteFunction={deleteTransaction}/>
                                 </div>
                                 ) : (

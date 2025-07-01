@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from db import db
 from datetime import datetime, timezone
 from models.finances_models import Transaction
+from models.menu_models import MenuItem
 
 orders_bp = Blueprint('orders', __name__)  # Blueprint for order management routes
 
@@ -37,7 +38,7 @@ def is_valid_price(price):
 def is_valid_items(items):
     if not isinstance(items, list) or len(items) == 0:
         return False
-    for item in items: # Check each item in the list
+    for item in items:
         if not isinstance(item, dict):
             return False
         if not all(k in item for k in ("id", "name", "quantity", "price")):
@@ -48,6 +49,11 @@ def is_valid_items(items):
             return False
         if not is_valid_price(item["price"]):
             return False
+
+        menu_item = MenuItem.query.get(item["id"])
+        if menu_item:
+            if menu_item.name.strip() != item["name"].strip():
+                return False
     return True
 
 def get_next_order_number():
@@ -85,6 +91,14 @@ def update_order_items(order, new_items_data):
 
     # Recalculate total
     order.total = round(sum(item.quantity * item.price for item in order.items), 2)
+
+def calculate_costs(items):
+    total_cost = 0.0
+    for item in items:
+        menu_item = MenuItem.query.get(item["id"])
+        if menu_item:
+            total_cost += menu_item.cost * item["quantity"]
+    return round(total_cost, 2)
 
 
 @orders_bp.route('/orders', methods=['GET'])
@@ -140,15 +154,26 @@ def create_order():
         db.session.add(new_order)
         db.session.commit()
         # Record in finances
-        transaction = Transaction(
+        transaction_income = Transaction(
             date=datetime.now(timezone.utc).date(),
             amount=total,
-            description=f"Order #{new_order.order_number}",
+            description=f"Order #{new_order.order_number} Sale",
             category_id=6,  # Sale
             is_income=True,
             manual_entry=False
         )
-        db.session.add(transaction)
+        db.session.add(transaction_income)
+        
+        total_cost = calculate_costs(data["items"])
+        transaction_expense = Transaction(
+            date=datetime.now(timezone.utc).date(),
+            amount=total_cost,
+            description=f"Order #{new_order.order_number} Production Cost",
+            category_id=4, # Production
+            is_income=False,
+            manual_entry=False
+        )
+        db.session.add(transaction_expense)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -164,6 +189,7 @@ def update_order(order_id):
     
     data = request.get_json()
     total_changed = False
+    cost_changed = False
     
     if "isTakeout" in data:
         if not is_valid_is_takeout(data["isTakeout"]):
@@ -190,6 +216,7 @@ def update_order(order_id):
             return jsonify({"error": "Invalid items"}), 400
         update_order_items(order, data["items"])
         total_changed = True
+        cost_changed = True
     
     if "orderNumber" in data:
         if not is_valid_order_number(data["orderNumber"]):
@@ -202,31 +229,51 @@ def update_order(order_id):
 
     try:
         db.session.commit()
-        transaction = Transaction.query.filter_by(
-            description=f"Order #{order.order_number}", 
-            manual_entry=False, category_id=6).first()
+        transaction_income = Transaction.query.filter_by(
+            description=f"Order #{order.order_number} Sale", 
+            manual_entry=False, category_id=6, is_income=True).first()
+        transaction_expense = Transaction.query.filter_by(
+            description=f"Order #{order.order_number} Production Cost", 
+            manual_entry=False, category_id=4, is_income=False).first()
         
         if not order.completed:
             # Delete transaction if exists and order not completed
-            if transaction:
-                db.session.delete(transaction)
-                db.session.commit()
+            if transaction_income:
+                db.session.delete(transaction_income)
+            if transaction_expense:
+                db.session.delete(transaction_expense)
+            db.session.commit()
         else:
             if total_changed:
-                if transaction:
-                    # Update existing transaction
-                    transaction.amount = order.total
-                    transaction.date = datetime.now(timezone.utc).date()
+                if transaction_income:
+                    transaction_income.amount = order.total
+                    transaction_income.date = datetime.now(timezone.utc).date()
                 else:
-                    transaction = Transaction(
+                    transaction_income = Transaction(
                         date=datetime.now(timezone.utc).date(),
                         amount=order.total,
-                        description=f"Order #{order.order_number}",
-                        category_id=6,  # Sale
+                        description=f"Order #{order.order_number} Sale",
+                        category_id=6,
                         is_income=True,
                         manual_entry=False
                     )
-                    db.session.add(transaction)
+                    db.session.add(transaction_income)
+            if cost_changed:
+                total_cost = calculate_costs(data["items"])
+                
+                if transaction_expense:
+                    transaction_expense.amount = total_cost
+                    transaction_expense.date = datetime.now(timezone.utc).date()
+                else:
+                    transaction_expense = Transaction(
+                        date=datetime.now(timezone.utc).date(),
+                        amount=total_cost,
+                        description=f"Order #{order.order_number} Production Cost",
+                        category_id=4,
+                        is_income=False,
+                        manual_entry=False
+                    )
+                    db.session.add(transaction_expense)
                 db.session.commit()
     except Exception as e:
         db.session.rollback()
