@@ -61,6 +61,7 @@ const OrdersEditModal = ({order, menuItems, staff, onEdited}) => {
     const handleEditOrder = async () => {
       if (!type || !server || orderItems.length === 0) {
         toast.error("Please fill out all required fields.")
+        setLoading(false)
         return
       }
   

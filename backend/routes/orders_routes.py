@@ -35,7 +35,7 @@ def is_valid_quantity(quantity):
 def is_valid_price(price):
     return isinstance(price, (int, float)) and price >= 0
 
-def is_valid_items(items):
+def is_valid_items(items, check_menu_items=True):
     if not isinstance(items, list) or len(items) == 0:
         return False
     for item in items:
@@ -50,9 +50,9 @@ def is_valid_items(items):
         if not is_valid_price(item["price"]):
             return False
 
-        menu_item = MenuItem.query.get(item["id"])
-        if menu_item:
-            if menu_item.name.strip() != item["name"].strip():
+        if check_menu_items:
+            menu_item = MenuItem.query.get(item["id"])
+            if not menu_item:
                 return False
     return True
 
@@ -78,7 +78,7 @@ def update_order_items(order, new_items_data):
         # If the item already exists in the order, update 
         if name in existing_items:
             existing_item = existing_items[name]
-            existing_item.quantity += quantity 
+            existing_item.quantity = quantity 
             existing_item.price = price 
             # Remove from order if quantity is zero or negative
             if existing_item.quantity <= 0:
@@ -128,7 +128,7 @@ def create_order():
         return jsonify({"error": "Invalid date"}), 400
     if not is_valid_server(data["server"]):
         return jsonify({"error": "Invalid server"}), 400
-    if not is_valid_items(data["items"]):
+    if not is_valid_items(data["items"], check_menu_items=True):
         return jsonify({"error": "Invalid items"}), 400
     
     order_number = get_next_order_number()
@@ -212,7 +212,8 @@ def update_order(order_id):
         order.completed = data["completed"]
 
     if "items" in data:
-        if not is_valid_items(data["items"]):
+        # check_menu_tems=False allows keeping items that might not be in the menu anymore
+        if not is_valid_items(data["items"], check_menu_items=False):
             return jsonify({"error": "Invalid items"}), 400
         update_order_items(order, data["items"])
         total_changed = True
@@ -288,11 +289,17 @@ def delete_order(order_id):
         return jsonify({"error": "Order not found"}), 404
     
     try:
-        transaction = Transaction.query.filter_by(
-            description=f"Order #{order.order_number}", 
-            manual_entry=False, category_id=6).first()
-        if transaction:
-            db.session.delete(transaction)
+        transaction_income = Transaction.query.filter_by(
+            description=f"Order #{order.order_number} Sale",
+            manual_entry=False, category_id=6, is_income=True).first()
+        if transaction_income:
+            db.session.delete(transaction_income)
+
+        transaction_expense = Transaction.query.filter_by(
+            description=f"Order #{order.order_number} Production Cost", manual_entry=False,
+            category_id=4, is_income=False).first()
+        if transaction_expense:
+            db.session.delete(transaction_expense)
         db.session.delete(order)
         db.session.commit()
     except Exception as e:

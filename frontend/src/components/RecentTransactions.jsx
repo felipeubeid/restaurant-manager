@@ -11,13 +11,13 @@ const RecentTransactions = ({transactions, categories, fetchData}) => {
     const [showAll, setShowAll] = useState(false)
   	const visibleTransactions = showAll ? transactions : transactions.slice(0, 6)
 
-      const deleteTransaction = async (id) => {
+    const deleteTransaction = async (id) => {
         try {
-          await axios.delete(`http://127.0.0.1:5000/finances/transactions/${id}`)
+            await axios.delete(`http://127.0.0.1:5000/finances/transactions/${id}`)
         } catch (error) {
-          throw new Error('Delete failed')
+            throw new Error('Delete failed')
         }
-      }
+    }
 
   	return (
     <Card className="shadow-none">

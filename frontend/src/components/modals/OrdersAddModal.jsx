@@ -58,6 +58,7 @@ const OrdersAddModal = ({menuItems, staff, onAdded}) => {
     const handleAddOrder = async () => {
       if (!type || !server || orderItems.length === 0) {
         toast.error("Please fill out all required fields.")
+        setLoading(false)
         return
       }
   

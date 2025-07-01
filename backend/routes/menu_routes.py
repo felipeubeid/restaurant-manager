@@ -34,7 +34,7 @@ def get_menu_categories():
 def get_menu_categories_names():
     menu_categories = MenuCategory.query.all()
     return jsonify({
-        "categories": [c.category for c in menu_categories],
+        "categories": [{"id": c.id, "name": c.category} for c in menu_categories],
         "lastUpdated": datetime.now(timezone.utc).isoformat()
     })
     
@@ -90,7 +90,7 @@ def update_menu_item(item_id):
     
     # Check for valid fields in the request
     if "name" in data:
-        if not is_valid_name(data["strip"]):
+        if not is_valid_name(data["name"]):
             return jsonify({"error": "Invalid name"}), 400
         item.name = data["name"].strip()
 

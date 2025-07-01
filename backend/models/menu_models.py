@@ -41,5 +41,6 @@ class MenuItem(db.Model):
             "description": self.description,
             "cost": self.cost,
             "price": self.price,
-            "available": self.available
+            "available": self.available,
+            "category_id": self.category_id
         }

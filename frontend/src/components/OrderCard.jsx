@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Clock, Loader2 } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import OrdersEditModal from './modals/OrdersEditModal'
 import DeleteModal from './modals/DeleteModal'
 import axios from 'axios'

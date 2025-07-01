@@ -6,6 +6,7 @@ import RevenueCategories from '@/components/RevenueCategories'
 import FinancesAddModal from '@/components/modals/FinancesAddModal'
 import { Loader2 } from 'lucide-react'
 import axios from 'axios'
+import toast from 'react-hot-toast'
 
 const Finances = () => {
   const [summary, setSummary] = useState([])
@@ -30,16 +31,16 @@ const Finances = () => {
         axios.get('http://127.0.0.1:5000/finances/categories'),
       ])
 
-      setSummary(summaryRes.data)
-      setRecentTransactions(transactionsRes.data.transactions)
-      setExpenseCategories(expenseCatRes.data.expenses)
-      setRevenueByCategory(revenueCatRes.data.revenue)
+      setSummary(summaryRes.data || [])
+      setRecentTransactions(transactionsRes.data.transactions || [])
+      setExpenseCategories(expenseCatRes.data.expenses || [])
+      setRevenueByCategory(revenueCatRes.data.revenue || [])
       setCategories({
         income: categoriesRes.data.incomeCategories,
         expense: categoriesRes.data.expenseCategories,
       })
     } catch (error) {
-      toast.error("Error.")
+      toast.error("Failed to load finances.")
     } finally {
       setLoading(false)  // done loading
     }

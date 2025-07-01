@@ -27,10 +27,11 @@ const FinancesAddModal = ({categoriesList, onAdded}) => {
 
   const handleAddTransaction = async () => {
     setLoading(true)
-    const amountVal = parseFloat(amount)
+    const amountVal = parseFloat(amount) || 0
     // Validate
     if (!type || !category || !amount || isNaN(amountVal) || amountVal < 0) {
       toast.error("Please fill in type, category, and a valid amount.")
+      setLoading(false)
       return 
     }
   

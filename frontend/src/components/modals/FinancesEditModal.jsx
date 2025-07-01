@@ -21,19 +21,13 @@ const FinancesEditModal = ({categoriesList, onEdited, transaction}) => {
   
   const categories = categoriesList || { income: [], expense: [] }
 
-  const handleTypeChange = (selectedType) => {
-    setLoading(true)
-    if (type !== selectedType) {
-      setType(selectedType)
-      setCategory("") // reset category when type changes
-    }
-  }
-
   const handleEditTransaction = async () => {
+    setLoading(true)
     const amountVal = parseFloat(amount)
     // Validate
     if (!type || !category || !amount || isNaN(amountVal) || amountVal <= 0) {
       toast.error("Please fill all required fields with valid data.")
+      setLoading(false)
       return
     }
   

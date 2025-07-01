@@ -91,7 +91,6 @@ const Orders = () => {
       setMenuItems(menuItemsRes.data || [])
       setStaff(staffRes.data.staff || [])
     } catch (error) {
-      console.error("Error fetching orders:", error)
       toast.error("Failed to load orders.")
     } finally {
       setLoading(false)
@@ -120,7 +119,7 @@ const Orders = () => {
           <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
               {orders.map((order) => (
-                <OrderCard order={order} menuItems={menuItems} 
+                <OrderCard key={order.id} order={order} menuItems={menuItems} 
                 staff={staff} fetchOrders={fetchOrders} />
               ))}
             </div>

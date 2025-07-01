@@ -4,19 +4,66 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@radix-ui/react-label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
-const StaffAddModal = () => {
+const StaffAddModal = ({staff, onAdded}) => {
   const [name, setName] = useState("")
   const [role, setRole] = useState("")
   const [wage, setWage] = useState("")
   const [contact, setContact] = useState("")
   const [days, setDays] = useState([])
-  const [shiftStart, setShiftStart] = useState()
-  const [shiftEnd, setShiftEnd] = useState()
+  const [shiftStart, setShiftStart] = useState("")
+  const [shiftEnd, setShiftEnd] = useState("")
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleAddStaff = async () => {
+    setLoading(true)
+    const wageVal = parseFloat(wage) || 0
+    // Validate
+    if (!name || !role || !wage || isNaN(wageVal) || wageVal < 0 
+    || !contact || !days || !shiftEnd || !shiftStart) {
+      toast.error("Please fill in name, role, contact, schedule and a valid wage.")
+      setLoading(false)
+      return 
+    }
+  
+    const payload = {
+      name,
+      role,
+      wage: wageVal,
+      contact,
+      days,
+      shift_start: shiftStart,
+      shift_end: shiftEnd
+    }
+  
+    try {
+      const res = await axios.post("http://127.0.0.1:5000/staff", payload)
+      if (onAdded) onAdded()
+
+      setName("")
+      setRole("")
+      setWage("")
+      setContact("")
+      setDays([])
+      setShiftStart("")
+      setShiftEnd("")
+      
+      setOpen(false)
+      toast.success("Staff member added!")
+    } catch (err) {
+      toast.error("Error adding staff member")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <Dialog onOpenChange={(isOpen) => {
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen)
       if (!isOpen) {
         setName("")
         setRole("")
@@ -27,7 +74,7 @@ const StaffAddModal = () => {
         setShiftEnd("")
       }}}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
+        <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
           <Plus className="h-4 w-4" /> Add Staff Member
         </Button>
       </DialogTrigger>
@@ -144,8 +191,9 @@ const StaffAddModal = () => {
         </div>
 
         <DialogFooter>
-          <Button type="submit">
-            <Plus className="h-4 w-4" />Add
+          <Button onClick={handleAddStaff} disabled={loading}>
+            <Plus className="h-4 w-4" />
+            {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Add'}
           </Button>
         </DialogFooter>
 

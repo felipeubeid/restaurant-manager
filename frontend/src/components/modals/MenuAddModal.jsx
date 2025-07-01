@@ -6,20 +6,72 @@ import { Label } from '@radix-ui/react-label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
-const MenuAddModal = () => {
+const MenuAddModal = ({categories, onAdded}) => {
   const [category, setCategory] = useState("")
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [cost, setCost] = useState("")
   const [available, setAvailable] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const categories = ["Appetizers", "Entrées", "Sides", "Desserts", "Beverages"]
+  const handleAddMenuItem = async () => {
+    const costVal = parseFloat(cost) || 0
+    const priceVal = parseFloat(price) || 0
+    setLoading(true)
+    if (!name || !cost || isNaN(costVal) || costVal < 0 
+    || !price || isNaN(priceVal) || priceVal < 0) {
+      toast.error("Please fill in name, and a valid price and/or cost.")
+      setLoading(false)
+      return 
+    }
+
+    const selectedCategory = categories.find(
+      (cat) => String(cat.id) === String(category))
+  
+    if (!selectedCategory) {
+      toast.error("Please select a valid category.")
+      setLoading(false)
+      return
+    }
+
+    const payload = {
+      category_id: selectedCategory.id,
+      name,
+      description: description || "",
+      price: priceVal,
+      cost: costVal,
+      available
+    }
+
+    try {
+      const res = await axios.post("http://127.0.0.1:5000/menu", payload)
+      if (onAdded) onAdded()
+
+      setCategory("")
+      setName("")
+      setDescription("")
+      setPrice("")
+      setCost("")
+      setAvailable(false)
+      
+      setOpen(false)
+      toast.success("Menu item added!")
+    } catch (err) {
+      toast.error("Error adding menu item")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <Dialog onOpenChange={(isOpen) => {
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen)
       if (!isOpen) {
       setCategory("")
       setName("")
@@ -29,7 +81,7 @@ const MenuAddModal = () => {
       setAvailable(false)
       }}}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
+        <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
           <Plus className="h-4 w-4" /> Add Menu Item
         </Button>
       </DialogTrigger>
@@ -47,8 +99,8 @@ const MenuAddModal = () => {
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                {(categories).map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                {(categories || []).map((cat) => (
+                  <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -121,7 +173,7 @@ const MenuAddModal = () => {
                   id="available" 
                   className="shadow-none border-lg"
                   checked={available}
-                  onCheckedChange={setAvailable}
+                  onCheckedChange={(checked) => setAvailable(checked === true)}
                   />
                 </div>
               </div>
@@ -129,8 +181,9 @@ const MenuAddModal = () => {
         </div>
 
         <DialogFooter>
-          <Button type="submit">
-            <Plus className="h-4 w-4" />Add
+        <Button onClick={handleAddMenuItem} disabled={loading}>
+            <Plus className="h-4 w-4" />
+            {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Add'}
           </Button>
         </DialogFooter>
 

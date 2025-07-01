@@ -1,12 +1,19 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import MenuEditModal from './modals/MenuEditModal'
 import DeleteModal from './modals/DeleteModal'
+import axios from 'axios'
 
-const MenuItem = ({ items, category }) => {
+const deleteMenuItem = async (id) => {
+    try {
+        await axios.delete(`http://127.0.0.1:5000/menu/${id}`)
+    } catch (error) {
+        throw new Error('Delete failed')
+    }
+  }
+
+const MenuItem = ({ items, fetchMenu, categories }) => {
   return (
     <div className="grid gap-6">
         {items.map((item, index) => (
@@ -28,8 +35,10 @@ const MenuItem = ({ items, category }) => {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2">
                         <div className="text-lg font-semibold">${item.price}</div>
                         <div className="flex gap-2">
-                            <MenuEditModal item={item} itemCategory={category}/>
-                            <DeleteModal title="Menu Item" />
+                            <MenuEditModal item={item} onEdited={fetchMenu} 
+                            categories={categories}/>
+                            <DeleteModal title="Order" onDeleted={fetchMenu} 
+                            deleteId={item.id} deleteFunction={deleteMenuItem}/>
                         </div>
                     </div>
                 </CardHeader>

@@ -139,17 +139,18 @@ def add_staff_member():
     try:
         db.session.add(new_member)
         db.session.commit()
+        if datetime.now(timezone.utc).time() >= datetime.strptime(shift_end, "%H:%M").time():
         # Record in finances
-        transaction = Transaction(
-            date=datetime.now(timezone.utc).date(),
-            amount=earnings,
-            description=f"{new_member.name} Payroll",
-            category_id=2,  # Payroll
-            is_income=False,
-            manual_entry=False
-        )
-        db.session.add(transaction)
-        db.session.commit()
+            transaction = Transaction(
+                date=datetime.now(timezone.utc).date(),
+                amount=earnings,
+                description=f"{new_member.name} Payroll",
+                category_id=2,  # Payroll
+                is_income=False,
+                manual_entry=False
+            )
+            db.session.add(transaction)
+            db.session.commit()
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -225,23 +226,24 @@ def update_staff_member(staff_id):
     try:
         db.session.commit()
         if earnings_changed:
-            transaction = Transaction.query.filter_by(
-                description=f"{staff_member.name} Payroll",
-                manual_entry=False, category_id=2).first()
-            if transaction:
-                # Update existing transaction
-                transaction.amount = staff_member.earnings
-                transaction.date = datetime.now(timezone.utc).date()
-            else:
-                transaction = Transaction(
-                    date=datetime.now(timezone.utc).date(),
-                    amount=staff_member.earnings,
+            if datetime.now(timezone.utc).time() >= datetime.strptime(staff_member.shift_end, "%H:%M").time():
+                transaction = Transaction.query.filter_by(
                     description=f"{staff_member.name} Payroll",
-                    category_id=2,  # Payroll
-                    is_income=False,
-                    manual_entry=False
-                )
-                db.session.add(transaction)
+                    manual_entry=False, category_id=2).first()
+                if transaction:
+                    # Update existing transaction
+                    transaction.amount = staff_member.earnings
+                    transaction.date = datetime.now(timezone.utc).date()
+                else:
+                    transaction = Transaction(
+                        date=datetime.now(timezone.utc).date(),
+                        amount=staff_member.earnings,
+                        description=f"{staff_member.name} Payroll",
+                        category_id=2,  # Payroll
+                        is_income=False,
+                        manual_entry=False
+                    )
+                    db.session.add(transaction)
         db.session.commit()
     except Exception as e:
         db.session.rollback()

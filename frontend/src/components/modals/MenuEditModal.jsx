@@ -6,22 +6,68 @@ import { Label } from '@radix-ui/react-label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Edit } from 'lucide-react'
+import { Edit, Loader2 } from 'lucide-react'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
-const MenuEditModal = ({item, itemCategory}) => {
-    const [category, setCategory] = useState(itemCategory || "")
+const MenuEditModal = ({item, categories, onEdited}) => {
+
+    const [category, setCategory] = useState("")
     const [name, setName] = useState(item?.name || "")
     const [description, setDescription] = useState(item?.description || "")
     const [price, setPrice] = useState(item?.price?.toString() || "")
     const [cost, setCost] = useState(item?.cost?.toString() || "")
     const [available, setAvailable] = useState(item?.available || false)
+    const [open, setOpen] = useState(false)
+    const [loading, setLoading] = useState(false)
   
-    const categories = ["Appetizers", "Entrées", "Sides", "Desserts", "Beverages"]
+    const handleEditMenuItem = async () => {
+      const costVal = parseFloat(cost) || 0
+      const priceVal = parseFloat(price) || 0
+      setLoading(true)
+      if (!name || !cost || isNaN(costVal) || costVal < 0 
+      || !price || isNaN(priceVal) || priceVal < 0) {
+        toast.error("Please fill in name, and a valid price and/or cost.")
+        setLoading(false)
+        return 
+      }
+  
+      const selectedCategory = categories.find(
+        (cat) => String(cat.id) === String(category))
+    
+      if (!selectedCategory) {
+        toast.error("Please select a valid category.")
+        setLoading(false)
+        return
+      }
+  
+      const payload = {
+        category_id: selectedCategory.id,
+        name,
+        description: description || "",
+        price: priceVal,
+        cost: costVal,
+        available
+      }
+  
+      try {
+        const res = await axios.patch(`http://127.0.0.1:5000/menu/${item.id}`, payload)
+        setOpen(false)
+        toast.success("Menu item edited!")
+        if (onEdited) onEdited()
+      } catch (err) {
+        toast.error("Error editing menu item")
+      } finally {
+        setLoading(false)
+      }
+    }
   
     return (
-      <Dialog onOpenChange={(isOpen) => {
+      <Dialog open ={open} onOpenChange={(isOpen) => {
+        setOpen(isOpen)
         if (isOpen) {
-        setCategory(itemCategory || "")
+        if (!item || categories.length === 0) return
+        setCategory(String(item.category_id))
         setName(item?.name || "")
         setDescription(item?.description || "")
         setPrice(item?.price?.toString() || "")
@@ -29,7 +75,7 @@ const MenuEditModal = ({item, itemCategory}) => {
         setAvailable(item?.available || false)
         }}}>
         <DialogTrigger asChild>
-            <Button size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
+        <Button onClick={() => setOpen(true)} size="sm" variant="outline" className="h-8 w-8 p-0 shadow-none">
               <Edit className="h-4 w-4" />
             </Button>
         </DialogTrigger>
@@ -46,8 +92,8 @@ const MenuEditModal = ({item, itemCategory}) => {
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(categories).map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  {(categories || []).map((cat) => (
+                    <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -128,7 +174,9 @@ const MenuEditModal = ({item, itemCategory}) => {
           </div>
   
           <DialogFooter>
-              <Button type="submit">Save</Button>
+            <Button onClick={handleEditMenuItem} disabled={loading}>
+              {loading ? <Loader2 className="animate-spin h-4 w-4 mx-auto" /> : 'Save'}
+            </Button>
           </DialogFooter>
   
         </DialogContent>
