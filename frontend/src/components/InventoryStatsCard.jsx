@@ -12,7 +12,7 @@ const InventoryStatsCard = ({ title, value, percentage, subtitle, icon: Icon, te
             </CardHeader>
             <CardContent>
                 <div className={`text-2xl font-bold pb-2 break-words ${textColor}`}>{value}</div>
-                <p className="text-xs">{percentage}% {subtitle}</p>
+                {/* <p className="text-xs">{percentage}% {subtitle}</p> */}
               </CardContent>
           </Card>
     )
