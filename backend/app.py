@@ -3,7 +3,7 @@ from routes.inventory_routes import inventory_bp
 from routes.staff_routes import staff_bp
 from routes.menu_routes import menu_bp
 from routes.orders_routes import orders_bp
-from routes.finances_routes import finances_bp
+from routes.finances_routes import finances_bp, recalculate_summaries
 from routes.home_routes import home_bp
 from models.seed import seed_menu_categories, seed_expense_categories, seed_income_categories
 from db import db
@@ -22,4 +22,5 @@ if __name__ == "__main__":
         seed_menu_categories()
         seed_expense_categories()
         seed_income_categories()
+        recalculate_summaries()
     app.run(debug=True)
